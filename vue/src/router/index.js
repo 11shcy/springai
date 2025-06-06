@@ -31,6 +31,11 @@ const routes = [
     path: '/game',
     name: 'game',
     component: () => import('../views/GameChat.vue')
+  },
+  {
+    path: '/damai-ai',
+    name: 'DaMaiAI',
+    component: () => import('../views/DaMaiAi.vue')
   }
 ]
 

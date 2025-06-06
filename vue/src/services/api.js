@@ -121,5 +121,22 @@ export const chatAPI = {
       console.error('API Error:', error)
       throw error
     }
+  },
+  // 发送大麦消息
+  async sendDaMaiMessage(prompt, chatId) {
+    try {
+      const response = await fetch(`${BASE_URL}/program/ai?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      return response.body.getReader()
+    } catch (error) {
+      console.error('API Error:', error)
+      throw error
+    }
   }
 } 

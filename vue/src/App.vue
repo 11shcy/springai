@@ -27,7 +27,7 @@ router.beforeEach((to, from, next) => {
 <template>
   <div class="app" :class="{ 'dark': isDark }">
     <nav class="navbar">
-      <router-link to="/" class="logo">Heima AI Hub</router-link>
+      <router-link to="/" class="logo">大麦 AI</router-link>
       <button @click="toggleDark()" class="theme-toggle">
         <SunIcon v-if="isDark" class="icon" />
         <MoonIcon v-else class="icon" />
@@ -89,13 +89,95 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: 1.8rem;
+    font-weight: 800;
     text-decoration: none;
     color: inherit;
-    background: linear-gradient(45deg, #007CF0, #00DFD8);
+    background: linear-gradient(45deg, 
+        rgba(255, 55, 29, 0.85),
+        rgba(255, 55, 29, 0.95),
+        rgba(255, 87, 34, 0.85)
+    );
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    animation: gradient 8s ease infinite;
+    letter-spacing: 1px;
+    padding: 0.5rem 0;
+    position: relative;
+    text-shadow: 0 2px 4px rgba(255, 55, 29, 0.1);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      background: linear-gradient(45deg, 
+          rgba(255, 55, 29, 0.1),
+          rgba(255, 87, 34, 0.1)
+      );
+      border-radius: 8px;
+      z-index: -1;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(45deg, 
+          rgba(255, 55, 29, 0.85),
+          rgba(255, 87, 34, 0.85)
+      );
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.3s ease;
+    }
+    
+    &:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      
+      &::before {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      
+      &::after {
+        transform: scaleX(1);
+        transform-origin: left;
+      }
+    }
+  }
+
+  @keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+  }
+
+  @keyframes glow {
+    0% {
+        box-shadow: 0 0 5px rgba(255, 55, 29, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 55, 29, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 5px rgba(255, 55, 29, 0.2);
+    }
   }
 
   .theme-toggle {

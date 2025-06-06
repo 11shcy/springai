@@ -1,7 +1,7 @@
 <template>
   <div class="home" :class="{ 'dark': isDark }">
     <div class="container">
-      <h1 class="title">黑马 AI 应用中心</h1>
+      <h1 class="title">大麦 AI 应用</h1>
       <div class="cards-grid">
         <router-link 
           v-for="app in aiApps" 
@@ -29,6 +29,7 @@ import {
   UserGroupIcon,
   DocumentTextIcon
 } from '@heroicons/vue/24/outline'
+import DamaiAssistantIcon from '../components/icons/DamaiAssistantIcon.vue'
 
 const isDark = useDark()
 
@@ -61,6 +62,13 @@ const aiApps = ref([
     description: '打造你的个人知识库，与知识库自由对话',
     route: '/chat-pdf',
     icon: DocumentTextIcon
+  },
+  {
+    id: 5,
+    title: '大麦贴心助手',
+    description: '每天陪伴你，解决大麦项目的问题',
+    route: '/damai-ai',
+    icon: DamaiAssistantIcon
   }
 ])
 </script>
@@ -82,7 +90,7 @@ const aiApps = ref([
     text-align: center;
     font-size: 2.5rem;
     margin-bottom: 3rem;
-    background: linear-gradient(45deg, #007CF0, #00DFD8);
+    background: linear-gradient(45deg, rgba(255, 55, 29, 0.85), #ff8f29);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: fadeIn 1s ease-out;
@@ -143,10 +151,10 @@ const aiApps = ref([
       width: 48px;
       height: 48px;
       margin-bottom: 1rem;
-      color: #007CF0;
+      color: rgba(255, 55, 29, 0.85);
 
       &.heart-icon {
-        color: #ff4d4f;
+        color: rgba(255, 55, 29, 0.85);
         animation: pulse 1.5s ease-in-out infinite;
       }
     }

@@ -22,7 +22,7 @@ spring:
         WRITE_NUMBERS_AS_STRINGS: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/damai_api?serverTimezone=Asia/Shanghai&useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&tinyInt1isBit=false&allowPublicKeyRetrieval=true&allowMultiQueries=true&useServerPrepStmts=false
+    url: jdbc:mysql://localhost:3306/itheima?serverTimezone=Asia/Shanghai&useSSL=false&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&tinyInt1isBit=false&allowPublicKeyRetrieval=true&allowMultiQueries=true&useServerPrepStmts=false
     username: root
     password: root
   ai:
@@ -32,7 +32,7 @@ spring:
         model: deepseek-r1:7b
     openai:
       base-url: https://dashscope.aliyuncs.com/compatible-mode
-      api-key: sk-941bc9ef9cc84773ba1088e986a19d69
+      api-key: ${OPENAI_API_KEY}
       chat:
         options:
           model: qwen-max-latest
@@ -40,7 +40,18 @@ spring:
         options:
           model: text-embedding-v3
           dimensions: 1024
+    deepseek:
+      base-url: https://api.deepseek.com
+      api-key: ${DEEPSEEK_API_KEY}
+      chat:
+        options:
+          model: deepseek-chat
 logging:
   level:
     org.springframework.ai: debug
     org.javaup.ai: debug
+easy-es:
+  enable: true #默认为true,若为false则认为不启用本框架
+  address : 62.234.31.217:9200 # es的连接地址,必须含端口 若为集群,则可以用逗号隔开 例如:127.0.0.1:9200,127.0.0.2:9200
+  username: elastic #若无 则可省略此行配置
+  password: 123qwe

@@ -1,8 +1,8 @@
 <template>
   <div class="message" :class="{ 'message-user': isUser }">
     <div class="avatar">
-      <UserCircleIcon v-if="isUser" class="icon" />
-      <ComputerDesktopIcon v-else class="icon" :class="{ 'assistant': !isUser }" />
+      <UserIcon v-if="isUser" class="icon" />
+      <LaptopIcon v-else class="icon" :class="{ 'assistant': !isUser }" />
     </div>
     <div class="content">
       <div class="text-container">
@@ -30,6 +30,8 @@ import { computed, onMounted, nextTick, ref, watch } from 'vue'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { UserCircleIcon, ComputerDesktopIcon, DocumentDuplicateIcon, CheckIcon } from '@heroicons/vue/24/outline'
+import LaptopIcon from './icons/LaptopIcon.vue'
+import UserIcon from './icons/UserIcon.vue'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
 

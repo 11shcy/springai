@@ -7,7 +7,8 @@ export default defineConfig({
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Cross-Origin-Embedder-Policy': 'require-corp'
-    }
+    },
+    port: 5172
   },
   optimizeDeps: {
     exclude: ['@pdftron/webviewer']
