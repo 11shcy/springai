@@ -43,15 +43,14 @@ public class ProgramService {
     }
 
     public ProgramDetailResultVo detail(ProgramDetailDto programDetailDto) {
-        ProgramDetailResultVo programDetailResultVo = new ProgramDetailResultVo();
         String result = HttpRequest.post(PROGRAM_DETAIL_URL)
                 .header("no_verify", "true")
                 .body(JSON.toJSONString(programDetailDto))
                 .timeout(20000)
                 .execute().body();
-        programDetailResultVo = JSON.parseObject(result, ProgramDetailResultVo.class);
+        ProgramDetailResultVo programDetailResultVo = JSON.parseObject(result, ProgramDetailResultVo.class);
         if (!Objects.equals(programDetailResultVo.getCode(), BaseCode.SUCCESS.getCode())) {
-            return programDetailResultVo;
+            throw new RuntimeException("调用大麦系统查询节目失败");
         }
         return programDetailResultVo;
     }

@@ -32,7 +32,7 @@ public class UserService {
                 .execute().body();
         userDetailResultVo = JSON.parseObject(result, UserDetailResultVo.class);
         if (!Objects.equals(userDetailResultVo.getCode(), BaseCode.SUCCESS.getCode())) {
-            return null;
+            throw new RuntimeException("调用大麦系统查询用户信息失败");
         }
         return userDetailResultVo.getData();
     }
@@ -48,8 +48,11 @@ public class UserService {
                 .timeout(20000)
                 .execute().body();
         ticketUserResultVo = JSON.parseObject(result, TicketUserResultVo.class);
-        if (!Objects.equals(ticketUserResultVo.getCode(), BaseCode.SUCCESS.getCode()) || Objects.isNull(ticketUserResultVo.getData())) {
-            return ticketUserVoList;
+        if (!Objects.equals(ticketUserResultVo.getCode(), BaseCode.SUCCESS.getCode())) {
+            throw new RuntimeException("调用大麦系统查询购票人信息失败");
+        }
+        if (Objects.isNull(ticketUserResultVo.getData())) {
+            throw new RuntimeException("购票人信息不存在");
         }
         return ticketUserResultVo.getData();
     }

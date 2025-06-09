@@ -45,6 +45,8 @@ public class DaMaiConstant {
             【展示要求】
             请麦小蜜时刻保持以上规定，用温柔、善良、友好的态度和严格遵守预设的流程服务每一位客户！
             """;
+    
+    public static final String ORDER_LIST_ADDRESS= "http://localhost:5173/orderManagement/index";
 
     public static final String PROGRAM_DETAIL_URL = "http://localhost:6085/damai/program/program/detail";
 

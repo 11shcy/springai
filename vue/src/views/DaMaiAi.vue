@@ -62,12 +62,12 @@
       </div>
     </div>
 
-    <!-- 预约成功弹窗 -->
-    <div v-if="showBookingModal" class="booking-modal">
+    <!-- 生成订单成功弹窗 -->
+    <div v-if="createOrderModal" class="create-order-modal">
       <div class="modal-content">
-        <h3>预约成功！</h3>
-        <div class="booking-info" v-html="bookingInfo"></div>
-        <button @click="showBookingModal = false">确定</button>
+        <h3>生成订单成功！</h3>
+        <div class="create-order-info" v-html="bookingInfo"></div>
+        <button @click="createOrderModal = false">确定</button>
       </div>
     </div>
   </div>
@@ -93,7 +93,7 @@ const isStreaming = ref(false)
 const currentChatId = ref(null)
 const currentMessages = ref([])
 const chatHistory = ref([])
-const showBookingModal = ref(false)
+const createOrderModal = ref(false)
 const bookingInfo = ref('')
 
 // 配置 marked
@@ -152,7 +152,7 @@ const sendMessage = async (content) => {
   currentMessages.value.push(assistantMessage)
   isStreaming.value = true
   
-  let accumulatedContent = ''
+  let totalContent = ''
   
   try {
     const reader = await chatAPI.sendDaMaiMessage(messageContent, currentChatId.value)
@@ -164,13 +164,13 @@ const sendMessage = async (content) => {
         if (done) break
         
         // 累积新内容
-        accumulatedContent += decoder.decode(value)
+        totalContent += decoder.decode(value)
         
         await nextTick(() => {
           // 更新消息
           const updatedMessage = {
             ...assistantMessage,
-            content: accumulatedContent,
+            content: totalContent,
             isMarkdown: true  // 保持 Markdown 标记
           }
           const lastIndex = currentMessages.value.length - 1
@@ -183,19 +183,19 @@ const sendMessage = async (content) => {
       }
     }
 
-    // 检查是否包含预约信息
-    if (accumulatedContent.includes('订单编号')) {
-      const bookingMatch = accumulatedContent.match(/【(.*?)】/s)
-      if (bookingMatch) {
+    // 检查是否包含订单编号信息
+    if (totalContent.includes('订单编号')) {
+      const createOrderMatch = totalContent.match(/【(.*?)】/s)
+      if (createOrderMatch) {
         // 使用 marked 处理预约信息中的 Markdown
         bookingInfo.value = DOMPurify.sanitize(
-          marked.parse(bookingMatch[1]),
+          marked.parse(createOrderMatch[1]),
           {
             ADD_TAGS: ['code', 'pre', 'span'],
             ADD_ATTR: ['class', 'language']
           }
         )
-        showBookingModal.value = true
+        createOrderModal.value = true
       }
     }
   } catch (error) {
@@ -483,7 +483,7 @@ onMounted(() => {
     }
   }
 
-  .booking-modal {
+  .create-order-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -509,7 +509,7 @@ onMounted(() => {
         color: #333;
       }
 
-      .booking-info {
+      .create-order-info {
         margin: 1.5rem 0;
         text-align: left;
         line-height: 1.6;
@@ -580,14 +580,14 @@ onMounted(() => {
     }
   }
 
-  .booking-modal .modal-content {
+  .create-order-modal .modal-content {
     background: #333;
 
     h3 {
       color: #fff;
     }
 
-    .booking-info {
+    .create-order-info {
       color: #ccc;
     }
 

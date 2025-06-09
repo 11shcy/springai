@@ -26,8 +26,11 @@ public class TicketCategoryService {
                 .timeout(20000)
                 .execute().body();
         TicketCategoryListResultVo ticketCategoryListResultVo = JSON.parseObject(result, TicketCategoryListResultVo.class);
-        if (!Objects.equals(ticketCategoryListResultVo.getCode(), BaseCode.SUCCESS.getCode()) || CollectionUtil.isEmpty(ticketCategoryListResultVo.getData())) {
-            return ticketCategoryDetailVoList;
+        if (!Objects.equals(ticketCategoryListResultVo.getCode(), BaseCode.SUCCESS.getCode())) {
+            throw new RuntimeException("调用大麦系统查询票档信息失败");
+        }
+        if (CollectionUtil.isEmpty(ticketCategoryListResultVo.getData())) {
+            throw new RuntimeException("票档信息不存在");
         }
         return ticketCategoryListResultVo.getData();
     }

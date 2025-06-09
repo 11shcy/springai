@@ -12,6 +12,7 @@ import org.javaup.ai.service.ProgramService;
 import org.javaup.ai.service.TicketCategoryService;
 import org.javaup.ai.service.UserService;
 import org.javaup.ai.utils.StringUtil;
+import org.javaup.ai.vo.CreateOrderVo;
 import org.javaup.ai.vo.ProgramDetailVo;
 import org.javaup.ai.vo.ProgramSearchVo;
 import org.javaup.ai.vo.TicketCategoryDetailVo;
@@ -30,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.javaup.ai.constants.DaMaiConstant.ORDER_LIST_ADDRESS;
 
 @Component
 public class AiProgram {
@@ -90,7 +93,7 @@ public class AiProgram {
     }
     
     @Tool(description = "生成用户购买节目的订单，返回订单号")
-    public String createOrder(@ToolParam(description = "查询的条件", required = true) CreateOrderFunctionDto createOrderFunctionDto){
+    public CreateOrderVo createOrder(@ToolParam(description = "查询的条件", required = true) CreateOrderFunctionDto createOrderFunctionDto){
         ProgramSearchFunctionDto programSearchFunctionDto = new ProgramSearchFunctionDto();
         BeanUtils.copyProperties(createOrderFunctionDto, programSearchFunctionDto);
         List<ProgramDetailVo> searchVoList = selectTicketCategory(programSearchFunctionDto);
@@ -139,6 +142,10 @@ public class AiProgram {
         programOrderCreateDto.setTicketUserIdList(ticketUserVoFilterList.stream().map(TicketUserVo::getId).collect(Collectors.toList()));
         programOrderCreateDto.setTicketCategoryId(ticketCategoryId);
         programOrderCreateDto.setTicketCount(createOrderFunctionDto.getTicketCount());
-        return orderService.createOrder(programOrderCreateDto);
+        String orderNumber = orderService.createOrder(programOrderCreateDto);
+        CreateOrderVo createOrderVo = new CreateOrderVo();
+        createOrderVo.setOrderNumber(orderNumber);
+        createOrderVo.setOrderListAddress(ORDER_LIST_ADDRESS);
+        return createOrderVo;
     }
 }

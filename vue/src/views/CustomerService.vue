@@ -63,10 +63,10 @@
     </div>
 
     <!-- 预约成功弹窗 -->
-    <div v-if="showBookingModal" class="booking-modal">
+    <div v-if="showBookingModal" class="create-order-modal">
       <div class="modal-content">
         <h3>预约成功！</h3>
-        <div class="booking-info" v-html="bookingInfo"></div>
+        <div class="create-order-info" v-html="bookingInfo"></div>
         <button @click="showBookingModal = false">确定</button>
       </div>
     </div>
@@ -482,7 +482,7 @@ onMounted(() => {
     }
   }
 
-  .booking-modal {
+  .create-order-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -508,7 +508,7 @@ onMounted(() => {
         color: #333;
       }
 
-      .booking-info {
+      .create-order-info {
         margin: 1.5rem 0;
         text-align: left;
         line-height: 1.6;
@@ -579,14 +579,14 @@ onMounted(() => {
     }
   }
 
-  .booking-modal .modal-content {
+  .create-order-modal .modal-content {
     background: #333;
 
     h3 {
       color: #fff;
     }
 
-    .booking-info {
+    .create-order-info {
       color: #ccc;
     }
 
