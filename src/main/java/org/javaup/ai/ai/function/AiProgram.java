@@ -1,19 +1,27 @@
 package org.javaup.ai.ai.function;
 
 import cn.hutool.core.collection.CollectionUtil;
+import org.javaup.ai.ai.function.dto.CreateOrderFunctionDto;
+import org.javaup.ai.ai.function.dto.ProgramRecommendFunctionDto;
+import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
 import org.javaup.ai.dto.ProgramDetailDto;
-import org.javaup.ai.dto.ProgramRecommendDto;
-import org.javaup.ai.dto.ProgramSearchDto;
+import org.javaup.ai.dto.ProgramOrderCreateDto;
 import org.javaup.ai.dto.TicketCategoryListByProgramDto;
+import org.javaup.ai.service.OrderService;
 import org.javaup.ai.service.ProgramService;
 import org.javaup.ai.service.TicketCategoryService;
-import org.javaup.ai.vo.ProgramDetailResultVo;
+import org.javaup.ai.service.UserService;
+import org.javaup.ai.utils.StringUtil;
 import org.javaup.ai.vo.ProgramDetailVo;
 import org.javaup.ai.vo.ProgramSearchVo;
 import org.javaup.ai.vo.TicketCategoryDetailVo;
 import org.javaup.ai.vo.TicketCategoryVo;
+import org.javaup.ai.vo.TicketUserVo;
+import org.javaup.ai.vo.UserDetailVo;
+import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,20 +40,26 @@ public class AiProgram {
     @Autowired
     private TicketCategoryService ticketCategoryService;
     
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private OrderService orderService;
+    
     @Tool(description = "根据地区或者类型查询推荐的节目")
-    public List<ProgramSearchVo> selectProgramRecommendList(@ToolParam(description = "查询的条件", required = false) ProgramRecommendDto programRecommendDto){
-        return programService.recommendList(programRecommendDto);
+    public List<ProgramSearchVo> selectProgramRecommendList(@ToolParam(description = "查询的条件", required = true) ProgramRecommendFunctionDto programRecommendFunctionDto){
+        return programService.recommendList(programRecommendFunctionDto);
     }
 
     @Tool(description = "根据条件查询节目")
-    public List<ProgramSearchVo> selectProgramList(@ToolParam(description = "查询的条件", required = false) ProgramSearchDto programSearchDto){
-        return programService.search(programSearchDto);
+    public List<ProgramSearchVo> selectProgramList(@ToolParam(description = "查询的条件", required = true) ProgramSearchFunctionDto programSearchFunctionDto){
+        return programService.search(programSearchFunctionDto);
     }
 
     @Tool(description = "根据条件查询节目的票档信息")
-    public List<ProgramDetailVo> selectTicketCategory(@ToolParam(description = "查询的条件", required = false) ProgramSearchDto programSearchDto){
+    public List<ProgramDetailVo> selectTicketCategory(@ToolParam(description = "查询的条件", required = true) ProgramSearchFunctionDto programSearchFunctionDto){
         List<ProgramDetailVo> programDetailVoList = new ArrayList<>();
-        List<ProgramSearchVo> programSearchVoList = programService.search(programSearchDto);
+        List<ProgramSearchVo> programSearchVoList = programService.search(programSearchFunctionDto);
         if (CollectionUtil.isEmpty(programSearchVoList)) {
             return programDetailVoList;
         }
@@ -73,5 +87,58 @@ public class AiProgram {
             }
         }
         return programDetailVoList;
+    }
+    
+    @Tool(description = "生成用户购买节目的订单，返回订单号")
+    public String createOrder(@ToolParam(description = "查询的条件", required = true) CreateOrderFunctionDto createOrderFunctionDto){
+        ProgramSearchFunctionDto programSearchFunctionDto = new ProgramSearchFunctionDto();
+        BeanUtils.copyProperties(createOrderFunctionDto, programSearchFunctionDto);
+        List<ProgramDetailVo> searchVoList = selectTicketCategory(programSearchFunctionDto);
+        if (CollectionUtil.isEmpty(searchVoList)) {
+            throw new RuntimeException("没有查询到节目，请检查查询条件是否正确");
+        }
+        ProgramDetailVo programDetailVo = searchVoList.get(0);
+        UserDetailVo userDetailVo = userService.userDetail(createOrderFunctionDto.getMobile());
+        if (Objects.isNull(userDetailVo)) {
+            throw new RuntimeException("用户信息不存在");
+        }
+        List<TicketUserVo> ticketUserVoList = userService.ticketUserList(userDetailVo.getId());
+        if (CollectionUtil.isEmpty(ticketUserVoList)) {
+            throw new RuntimeException("购票人信息不存在");
+        }
+        List<TicketUserVo> ticketUserVoFilterList = new ArrayList<>();
+        for (final TicketUserVo ticketUserVo : ticketUserVoList) {
+            for (final String number : createOrderFunctionDto.getTicketUserNumberList()) {
+                String ticketUserNumberFirst = StringUtil.getFirstN(ticketUserVo.getIdNumber(),4);
+                String ticketUserNumberLast = StringUtil.getLastN(ticketUserVo.getIdNumber(),4);
+                
+                String paramNumberFirst = StringUtil.getFirstN(number,4);
+                String paramNumberLast = StringUtil.getLastN(number,4);
+                
+                if (ticketUserNumberFirst.equals(paramNumberFirst) && ticketUserNumberLast.equals(paramNumberLast)) {
+                    ticketUserVoFilterList.add(ticketUserVo);
+                }
+            }
+        }
+        if (ticketUserVoFilterList.size() != createOrderFunctionDto.getTicketUserNumberList().size()) {
+            throw new RuntimeException("购票人信息不完整，请检查购票人信息是否正确");
+        }
+        Long ticketCategoryId = null;
+        for (final TicketCategoryVo ticketCategoryVo : programDetailVo.getTicketCategoryVoList()) {
+            if (createOrderFunctionDto.getTicketCategoryPrice().compareTo(ticketCategoryVo.getPrice()) == 0) {
+                ticketCategoryId = ticketCategoryVo.getId();
+                break;
+            }
+        }
+        if (Objects.isNull(ticketCategoryId)) {
+            throw new RuntimeException("没有查询到对应的票档信息");
+        }
+        ProgramOrderCreateDto programOrderCreateDto = new ProgramOrderCreateDto();
+        programOrderCreateDto.setProgramId(programDetailVo.getId());
+        programOrderCreateDto.setUserId(userDetailVo.getId());
+        programOrderCreateDto.setTicketUserIdList(ticketUserVoFilterList.stream().map(TicketUserVo::getId).collect(Collectors.toList()));
+        programOrderCreateDto.setTicketCategoryId(ticketCategoryId);
+        programOrderCreateDto.setTicketCount(createOrderFunctionDto.getTicketCount());
+        return orderService.createOrder(programOrderCreateDto);
     }
 }

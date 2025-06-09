@@ -1,10 +1,10 @@
 package org.javaup.ai.cotroller;
 
 import org.javaup.ai.dto.ProgramDetailDto;
-import org.javaup.ai.dto.ProgramSearchDto;
+import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
 import org.javaup.ai.repository.ChatHistoryRepository;
 import org.javaup.ai.service.ProgramService;
-import org.javaup.ai.vo.ProgramDetailResultVo;
+import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.javaup.ai.vo.ProgramSearchVo;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -45,8 +45,8 @@ public class ProgramController {
     }
 
     @PostMapping(value = "/search")
-    public List<ProgramSearchVo> search(@RequestBody ProgramSearchDto programSearchDto) {
-        return programService.search(programSearchDto);
+    public List<ProgramSearchVo> search(@RequestBody ProgramSearchFunctionDto programSearchFunctionDto) {
+        return programService.search(programSearchFunctionDto);
     }
 
     @PostMapping(value = "/detail")

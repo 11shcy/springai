@@ -2,7 +2,6 @@ package org.javaup.ai.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.javaup.ai.vo.base.ApiResponse;
 
 import java.io.Serial;
 import java.io.Serializable;

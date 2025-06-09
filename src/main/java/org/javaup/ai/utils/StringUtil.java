@@ -88,4 +88,30 @@ public class StringUtil {
 		}
 		return resultMap;
 	}
+	
+	/**
+	 * 获取字符串地前N个字符
+	 * */
+	public static String getFirstN(String input, int length) {
+		if (input == null || length <= 0) {
+			return "";
+		}
+		if (input.length() <= length) {
+			return input;
+		}
+		return input.substring(0, length);
+	}
+	
+	/**
+	 * 获取字符串地后N个字符
+	 * */
+	public static String getLastN(String input, int length) {
+		if (input == null || length <= 0) {
+			return ""; 
+		}
+		if (input.length() <= length) {
+			return input; 
+		}
+		return input.substring(input.length() - length);
+	}
 }

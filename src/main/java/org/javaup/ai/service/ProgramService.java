@@ -6,12 +6,12 @@ import com.alibaba.fastjson.JSON;
 import org.dromara.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import org.dromara.easyes.core.kernel.EsWrappers;
 import org.javaup.ai.dto.ProgramDetailDto;
-import org.javaup.ai.dto.ProgramRecommendDto;
-import org.javaup.ai.dto.ProgramSearchDto;
+import org.javaup.ai.ai.function.dto.ProgramRecommendFunctionDto;
+import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
 import org.javaup.ai.enums.BaseCode;
 import org.javaup.ai.es.mapper.ProgramMapper;
 import org.javaup.ai.utils.StringUtil;
-import org.javaup.ai.vo.ProgramDetailResultVo;
+import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.javaup.ai.vo.ProgramSearchVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,18 +27,18 @@ public class ProgramService {
     @Autowired
     private ProgramMapper programMapper;
     
-    public List<ProgramSearchVo> recommendList(ProgramRecommendDto programRecommendDto){
+    public List<ProgramSearchVo> recommendList(ProgramRecommendFunctionDto programRecommendFunctionDto){
         LambdaEsQueryWrapper<ProgramSearchVo> wrapper = EsWrappers.lambdaQuery(ProgramSearchVo.class)
-                .eq(StringUtil.isNotEmpty(programRecommendDto.getAreaName()), ProgramSearchVo::getAreaName, programRecommendDto.getAreaName())
-                .eq(StringUtil.isNotEmpty(programRecommendDto.getProgramCategory()), ProgramSearchVo::getParentProgramCategoryName, programRecommendDto.getProgramCategory());
+                .eq(StringUtil.isNotEmpty(programRecommendFunctionDto.getAreaName()), ProgramSearchVo::getAreaName, programRecommendFunctionDto.getAreaName())
+                .eq(StringUtil.isNotEmpty(programRecommendFunctionDto.getProgramCategory()), ProgramSearchVo::getParentProgramCategoryName, programRecommendFunctionDto.getProgramCategory());
         return programMapper.selectList(wrapper);
     }
 
-    public List<ProgramSearchVo> search(ProgramSearchDto programSearchDto){
+    public List<ProgramSearchVo> search(ProgramSearchFunctionDto programSearchFunctionDto){
         LambdaEsQueryWrapper<ProgramSearchVo> wrapper = EsWrappers.lambdaQuery(ProgramSearchVo.class)
-                .eq(StringUtil.isNotEmpty(programSearchDto.getCityName()), ProgramSearchVo::getAreaName, programSearchDto.getCityName())
-                .eq(StringUtil.isNotEmpty(programSearchDto.getActor()), ProgramSearchVo::getActor, programSearchDto.getActor())
-                .ge(Objects.nonNull(programSearchDto.getShowTime()), ProgramSearchVo::getShowTime, programSearchDto.getShowTime());
+                .eq(StringUtil.isNotEmpty(programSearchFunctionDto.getCityName()), ProgramSearchVo::getAreaName, programSearchFunctionDto.getCityName())
+                .eq(StringUtil.isNotEmpty(programSearchFunctionDto.getActor()), ProgramSearchVo::getActor, programSearchFunctionDto.getActor())
+                .ge(Objects.nonNull(programSearchFunctionDto.getShowTime()), ProgramSearchVo::getShowTime, programSearchFunctionDto.getShowTime());
         return programMapper.selectList(wrapper);
     }
 

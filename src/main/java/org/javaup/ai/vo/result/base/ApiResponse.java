@@ -1,4 +1,4 @@
-package org.javaup.ai.vo.base;
+package org.javaup.ai.vo.result.base;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

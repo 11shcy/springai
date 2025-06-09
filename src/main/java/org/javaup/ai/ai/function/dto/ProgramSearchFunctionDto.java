@@ -1,4 +1,4 @@
-package org.javaup.ai.dto;
+package org.javaup.ai.ai.function.dto;
 
 import lombok.Data;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -11,7 +11,7 @@ import java.util.Date;
  * @author: 阿星不是程序员
  **/
 @Data
-public class ProgramSearchDto{
+public class ProgramSearchFunctionDto {
 
     @ToolParam(required = false, description = "节目演出城市")
     private String cityName;

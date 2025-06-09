@@ -184,7 +184,7 @@ const sendMessage = async (content) => {
     }
 
     // 检查是否包含预约信息
-    if (accumulatedContent.includes('预约编号')) {
+    if (accumulatedContent.includes('订单编号')) {
       const bookingMatch = accumulatedContent.match(/【(.*?)】/s)
       if (bookingMatch) {
         // 使用 marked 处理预约信息中的 Markdown
