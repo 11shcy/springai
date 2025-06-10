@@ -10,11 +10,11 @@ import static org.springframework.ai.chat.messages.MessageType.USER;
 
 @NoArgsConstructor
 @Data
-public class MessageVO {
+public class ChatHistoryMessageVO {
     private String role;
     private String content;
 
-    public MessageVO(Message message) {
+    public ChatHistoryMessageVO(Message message) {
         MessageType messageType = message.getMessageType();
         if (messageType == USER) {
             this.role = "user";

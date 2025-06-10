@@ -3,11 +3,9 @@ package org.javaup.ai.cotroller;
 import lombok.RequiredArgsConstructor;
 import org.javaup.ai.common.ApiResponse;
 import org.javaup.ai.service.ChatHistoryService;
-import org.javaup.ai.vo.MessageVO;
+import org.javaup.ai.vo.ChatHistoryMessageVO;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,15 +21,15 @@ public class ChatHistoryController {
 
     private final ChatMemory chatMemory;
 
-    @GetMapping("/{type}")
-    public List<String> getChatIds(@PathVariable("type") Integer type) {
+    @RequestMapping("/chatId/list")
+    public List<String> getChatIds(@RequestParam("type") Integer type) {
         return chatHistoryService.getChatIdList(type);
     }
 
-    @GetMapping("/{type}/{chatId}")
-    public List<MessageVO> getChatHistory(@PathVariable("type") Integer type, @PathVariable("chatId") String chatId) {
+    @RequestMapping("/chatHistory/list")
+    public List<ChatHistoryMessageVO> getChatHistory(@RequestParam("chatId") String chatId,@RequestParam("type") Integer type) {
         List<Message> messages = chatMemory.get(chatId);
-        return messages.stream().map(MessageVO::new).toList();
+        return messages.stream().map(ChatHistoryMessageVO::new).toList();
     }
     
     @RequestMapping(value = "/delete")

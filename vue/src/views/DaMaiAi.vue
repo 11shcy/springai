@@ -19,6 +19,13 @@
           >
             <ChatBubbleIcon class="icon" :size="24" />
             <span class="title">{{ chat.title || '新的聊天' }}</span>
+            <button 
+              class="delete-btn" 
+              @click.stop="deleteChat(chat.id)"
+              title="删除对话"
+            >
+              <TrashIcon class="icon" :size="20" />
+            </button>
           </div>
         </div>
       </div>
@@ -84,6 +91,7 @@ import LaptopIcon from '../components/icons/LaptopIcon.vue'
 import ChatBubbleIcon from '../components/icons/ChatBubbleIcon.vue'
 import PlusIcon from '../components/icons/PlusIcon.vue'
 import SendIcon from '../components/icons/SendIcon.vue'
+import TrashIcon from '../components/icons/TrashIcon.vue'
 
 const isDark = useDark()
 const messagesRef = ref(null)
@@ -253,7 +261,28 @@ const startNewChat = async () => {  // 添加 async
   chatHistory.value = [newChat, ...chatHistory.value]
 
   // 发送初始问候语
-  await sendMessage('你好')
+  await sendMessage('你好啊，麦小蜜')
+}
+
+// 删除对话
+const deleteChat = async (chatId) => {
+  if (!confirm('确定要删除这个对话吗？')) {
+    return
+  }
+  
+  try {
+    await chatAPI.deleteChat(chatId,2)
+    // 从历史记录中移除
+    chatHistory.value = chatHistory.value.filter(chat => chat.id !== chatId)
+    
+    // 如果删除的是当前对话，则创建新对话
+    if (currentChatId.value === chatId) {
+      await startNewChat()
+    }
+  } catch (error) {
+    console.error('删除对话失败:', error)
+    alert('删除对话失败，请稍后重试')
+  }
 }
 
 onMounted(() => {
@@ -344,6 +373,10 @@ onMounted(() => {
         
         &:hover {
           background: rgba(0, 0, 0, 0.05);
+          
+          .delete-btn {
+            opacity: 1;
+          }
         }
         
         &.active {
@@ -360,6 +393,27 @@ onMounted(() => {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+        }
+
+        .delete-btn {
+          opacity: 0;
+          background: none;
+          border: none;
+          padding: 0.25rem;
+          cursor: pointer;
+          color: #666;
+          transition: all 0.3s ease;
+          border-radius: 0.25rem;
+          
+          &:hover {
+            color: #ff4d4f;
+            background: rgba(255, 77, 79, 0.1);
+          }
+          
+          .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+          }
         }
       }
     }

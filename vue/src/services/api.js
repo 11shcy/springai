@@ -29,7 +29,7 @@ export const chatAPI = {
   // 获取聊天历史列表
   async getChatHistory(type = 1) {  // 添加类型参数
     try {
-      const response = await fetch(`${BASE_URL}/ai/history/${type}`)
+      const response = await fetch(`${BASE_URL}/ai/history/chatId/list?type=${type}`)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -50,7 +50,7 @@ export const chatAPI = {
   // 获取特定对话的消息历史
   async getChatMessages(chatId, type = 1) {  // 添加类型参数
     try {
-      const response = await fetch(`${BASE_URL}/ai/history/${type}/${chatId}`)
+      const response = await fetch(`${BASE_URL}/ai/history/chatHistory/list?chatId=${chatId}&type=${type}`)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -134,6 +134,22 @@ export const chatAPI = {
       }
 
       return response.body.getReader()
+    } catch (error) {
+      console.error('API Error:', error)
+      throw error
+    }
+  },
+  // 删除对话
+  async deleteChat(chatId, type = 1) {
+    try {
+      const response = await fetch(`${BASE_URL}/ai/history/delete?chatId=${chatId}&type=${type}`, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      return true
     } catch (error) {
       console.error('API Error:', error)
       throw error
