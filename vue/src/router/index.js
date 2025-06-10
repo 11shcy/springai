@@ -18,11 +18,6 @@ const routes = [
     component: () => import('../views/ComfortSimulator.vue')
   },
   {
-    path: '/customer-service',
-    name: 'CustomerService',
-    component: () => import('../views/CustomerService.vue')
-  },
-  {
     path: '/chat-pdf',
     name: 'ChatPDF',
     component: () => import('../views/ChatPDF.vue')

@@ -252,7 +252,7 @@ const loadChat = async (chatId) => {
   
   try {
     // 加载消息历史
-    const messages = await chatAPI.getChatMessages(chatId, 'pdf')
+    const messages = await chatAPI.getChatMessages(chatId, 4)
     currentMessages.value = messages.map(msg => ({
       ...msg,
       isMarkdown: msg.role === 'assistant'
@@ -299,7 +299,7 @@ const loadChat = async (chatId) => {
 // 加载聊天历史
 const loadChatHistory = async () => {
   try {
-    const history = await chatAPI.getChatHistory('pdf')
+    const history = await chatAPI.getChatHistory(4)
     chatHistory.value = history || []
     if (history && history.length > 0) {
       await loadChat(history[0].id)

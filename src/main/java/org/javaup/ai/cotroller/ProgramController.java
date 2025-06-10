@@ -1,21 +1,24 @@
 package org.javaup.ai.cotroller;
 
-import org.javaup.ai.dto.ProgramDetailDto;
 import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
-import org.javaup.ai.repository.ChatHistoryRepository;
+import org.javaup.ai.dto.ProgramDetailDto;
+import org.javaup.ai.enums.ChatType;
+import org.javaup.ai.service.ChatHistoryService;
 import org.javaup.ai.service.ProgramService;
-import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.javaup.ai.vo.ProgramSearchVo;
+import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-
-import static org.javaup.ai.constants.DaMaiConstant.DA_MAI_TYPE;
 
 @RestController
 @RequestMapping("/program")
@@ -29,13 +32,13 @@ public class ProgramController {
     private ChatClient serviceChatClient;
 
     @Autowired
-    private ChatHistoryRepository chatHistoryRepository;
+    private ChatHistoryService chatHistoryService;
 
     @RequestMapping(value = "/ai", produces = "text/html;charset=utf-8")
     public Flux<String> service(@RequestParam("prompt") String prompt,
                                 @RequestParam("chatId") String chatId) {
         // 1.保存会话id
-        chatHistoryRepository.save(DA_MAI_TYPE, chatId);
+        chatHistoryService.save(ChatType.DAMAI.getCode(), chatId);
         // 2.请求模型
         return serviceChatClient.prompt()
                 .user(prompt)

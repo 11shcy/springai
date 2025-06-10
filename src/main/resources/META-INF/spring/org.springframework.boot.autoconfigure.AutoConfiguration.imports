@@ -1,1 +1,2 @@
 org.javaup.ai.config.DaMaiAiAutoConfiguration
+org.javaup.ai.mybatisplus.MybatisPlusAutoConfiguration

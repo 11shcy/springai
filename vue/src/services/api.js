@@ -27,7 +27,7 @@ export const chatAPI = {
   },
 
   // 获取聊天历史列表
-  async getChatHistory(type = 'chat') {  // 添加类型参数
+  async getChatHistory(type = 1) {  // 添加类型参数
     try {
       const response = await fetch(`${BASE_URL}/ai/history/${type}`)
       if (!response.ok) {
@@ -37,8 +37,8 @@ export const chatAPI = {
       // 转换为前端需要的格式
       return chatIds.map(id => ({
         id,
-        title: type === 'pdf' ? `PDF对话 ${id.slice(-6)}` : 
-               type === 'service' ? `咨询 ${id.slice(-6)}` :
+        title: type === 4 ? `PDF对话 ${id.slice(-6)}` : 
+               type === 2 ? `咨询 ${id.slice(-6)}` :
                `对话 ${id.slice(-6)}`
       }))
     } catch (error) {
@@ -48,7 +48,7 @@ export const chatAPI = {
   },
 
   // 获取特定对话的消息历史
-  async getChatMessages(chatId, type = 'chat') {  // 添加类型参数
+  async getChatMessages(chatId, type = 1) {  // 添加类型参数
     try {
       const response = await fetch(`${BASE_URL}/ai/history/${type}/${chatId}`)
       if (!response.ok) {
