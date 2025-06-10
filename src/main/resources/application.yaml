@@ -39,9 +39,6 @@ spring:
     openai:
       base-url: https://dashscope.aliyuncs.com/compatible-mode
       api-key: ${OPENAI_API_KEY}
-      chat:
-        options:
-          model: qwen-max-latest
       embedding:
         options:
           model: text-embedding-v3
