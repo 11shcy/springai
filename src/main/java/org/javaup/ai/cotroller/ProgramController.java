@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -24,29 +26,51 @@ import java.util.List;
 @RequestMapping("/program")
 public class ProgramController {
 
+    private static final Logger log = LoggerFactory.getLogger(ProgramController.class);
+
     @Autowired
     private ProgramService programService;
 
-    @Qualifier("damaiChatClient")
+    @Qualifier("assistantChatClient")
     @Autowired
-    private ChatClient serviceChatClient;
-
+    private ChatClient assistantChatClient;
+    
+    @Qualifier("markdownChatClient")
+    @Autowired
+    private ChatClient markdownChatClient;
+    
     @Autowired
     private ChatHistoryService chatHistoryService;
 
     @RequestMapping(value = "/ai", produces = "text/html;charset=utf-8")
-    public Flux<String> service(@RequestParam("prompt") String prompt,
+    public Flux<String> ai(@RequestParam("prompt") String prompt,
                                 @RequestParam("chatId") String chatId) {
         // 1.保存会话id
-        chatHistoryService.save(ChatType.DAMAI.getCode(), chatId);
+        chatHistoryService.save(ChatType.ASSISTANT.getCode(), chatId);
         // 2.请求模型
-        return serviceChatClient.prompt()
+        return assistantChatClient.prompt()
                 .user(prompt)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .stream()
                 .content();
     }
-
+    
+    @RequestMapping(value = "/rag", produces = "text/html;charset=utf-8")
+    public Flux<String> rag(@RequestParam("prompt") String prompt,
+                             @RequestParam("chatId") String chatId) {
+        /// 1.保存会话id
+        chatHistoryService.save(ChatType.MARKDOWN.getCode(), chatId);
+        // 2.请求模型
+        return markdownChatClient.prompt()
+                .user(prompt)
+                .advisors(a -> {
+                    log.info("设置会话ID: {}", chatId);
+                    a.param(ChatMemory.CONVERSATION_ID, chatId);
+                })
+                .stream()
+                .content();
+    }
+    
     @PostMapping(value = "/search")
     public List<ProgramSearchVo> search(@RequestBody ProgramSearchFunctionDto programSearchFunctionDto) {
         return programService.search(programSearchFunctionDto);

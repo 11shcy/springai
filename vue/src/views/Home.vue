@@ -69,6 +69,13 @@ const aiApps = ref([
     description: '每天陪伴你，解决大麦项目的问题',
     route: '/damai-ai',
     icon: DamaiAssistantIcon
+  },
+  {
+    id: 5,
+    title: '大麦规则助手',
+    description: '帮你解决大麦相关规则问题',
+    route: '/damai-rag',
+    icon: DamaiAssistantIcon
   }
 ])
 </script>

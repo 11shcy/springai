@@ -122,10 +122,27 @@ export const chatAPI = {
       throw error
     }
   },
-  // 发送大麦消息
-  async sendDaMaiMessage(prompt, chatId) {
+  // 发送助手消息
+  async sendAssistantMessage(prompt, chatId) {
     try {
       const response = await fetch(`${BASE_URL}/program/ai?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      return response.body.getReader()
+    } catch (error) {
+      console.error('API Error:', error)
+      throw error
+    }
+  },
+  // 发送rag消息
+  async sendRagMessage(prompt, chatId) {
+    try {
+      const response = await fetch(`${BASE_URL}/program/rag?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
         method: 'GET',
       })
 

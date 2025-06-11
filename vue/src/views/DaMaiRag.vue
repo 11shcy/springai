@@ -36,7 +36,7 @@
             <LaptopIcon class="avatar" :size="48" />
             <div class="info">
               <h3>麦小蜜</h3>
-              <p>大麦系统智能客服</p>
+              <p>大麦系统规则助手</p>
             </div>
           </div>
         </div>
@@ -163,7 +163,7 @@ const sendMessage = async (content) => {
   let totalContent = ''
   
   try {
-    const reader = await chatAPI.sendAssistantMessage(messageContent, currentChatId.value)
+    const reader = await chatAPI.sendRagMessage(messageContent, currentChatId.value)
     const decoder = new TextDecoder('utf-8')
     
     while (true) {
@@ -219,7 +219,7 @@ const sendMessage = async (content) => {
 const loadChat = async (chatId) => {
   currentChatId.value = chatId
   try {
-    const messages = await chatAPI.getChatMessages(chatId, 2)
+    const messages = await chatAPI.getChatMessages(chatId, 3)
     currentMessages.value = messages.map(msg => ({
       ...msg,
       isMarkdown: msg.role === 'assistant'  // 为助手消息添加 Markdown 标记
@@ -233,7 +233,7 @@ const loadChat = async (chatId) => {
 // 加载聊天历史
 const loadChatHistory = async () => {
   try {
-    const history = await chatAPI.getChatHistory(2)
+    const history = await chatAPI.getChatHistory(3)
     chatHistory.value = history || []
     if (history && history.length > 0) {
       await loadChat(history[0].id)
@@ -271,7 +271,7 @@ const deleteChat = async (chatId) => {
   }
   
   try {
-    await chatAPI.deleteChat(chatId,2)
+    await chatAPI.deleteChat(chatId,3)
     // 从历史记录中移除
     chatHistory.value = chatHistory.value.filter(chat => chat.id !== chatId)
     

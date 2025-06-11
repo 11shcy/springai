@@ -11,8 +11,8 @@ public enum ChatType {
      * 通用状态枚举
      * */
     CHAT(1,"普通会话"),
-    DAMAI(2,"大麦智能客户"),
-    PDF(3,"PDF智能助手"),
+    ASSISTANT(2,"助理智能客户"),
+    MARKDOWN(3,"Markdown助手"),
     ;
 
     private final Integer code;

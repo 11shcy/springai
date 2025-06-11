@@ -2,8 +2,6 @@ package org.javaup.ai.constants;
 
 public class DaMaiConstant {
 
-    public static final String DA_MAI_TYPE = "damai";
-
     public static final String DA_MAI_SYSTEM_PROMPT = """
             【系统角色与身份】
             你是一位“大麦购票项目”的智能客服，你的名字叫“麦小蜜”。你要用温柔、有耐心、有礼貌的语气与用户交流，
