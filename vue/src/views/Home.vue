@@ -87,13 +87,12 @@ const aiApps = ref([
     gap: 2rem;
     justify-items: center;
     padding: 1rem;
+    max-width: 400px;
+    margin: 0 auto;
 
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
     @media (min-width: 1200px) {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      max-width: 1200px;
     }
   }
 
@@ -107,9 +106,18 @@ const aiApps = ref([
     padding: 2rem;
     text-decoration: none;
     color: inherit;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
+    animation: cardAppear 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+
+    @for $i from 1 through 3 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.2}s;
+      }
+    }
 
     .dark & {
       background: rgba(255, 255, 255, 0.05);
@@ -117,11 +125,15 @@ const aiApps = ref([
     }
 
     &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
       
       .dark & {
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      .icon {
+        transform: scale(1.1) rotate(5deg);
       }
     }
 
@@ -137,6 +149,7 @@ const aiApps = ref([
       height: 48px;
       margin-bottom: 1rem;
       color: rgba(255, 55, 29, 0.85);
+      transition: transform 0.3s ease;
 
       &.heart-icon {
         color: rgba(255, 55, 29, 0.85);
@@ -147,11 +160,13 @@ const aiApps = ref([
     h2 {
       font-size: 1.5rem;
       margin-bottom: 0.5rem;
+      transition: color 0.3s ease;
     }
 
     p {
       color: #666;
       font-size: 1rem;
+      transition: color 0.3s ease;
 
       .dark & {
         color: #999;
@@ -192,6 +207,17 @@ const aiApps = ref([
   }
   100% {
     transform: scale(1);
+  }
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
