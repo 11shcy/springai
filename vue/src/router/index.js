@@ -8,8 +8,8 @@ const routes = [
   },
   {
     path: '/ai-chat',
-    name: 'AIChat',
-    component: () => import('../views/AIChat.vue')
+    name: 'ChatPro',
+    component: () => import('../views/ChatPro.vue')
   },
   {
     path: '/damai-ai',
@@ -18,8 +18,8 @@ const routes = [
   },
   {
     path: '/damai-rag',
-    name: 'DaMaiRag',
-    component: () => import('../views/DaMaiRag.vue')
+    name: 'SmartRag',
+    component: () => import('../views/SmartRag.vue')
   }
 ]
 
