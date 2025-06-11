@@ -293,7 +293,6 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .smart-assistant {
-  margin-top: 64px;
   position: fixed;
   top: 64px;
   left: 0;

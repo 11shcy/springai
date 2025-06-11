@@ -78,21 +78,38 @@ const aiApps = ref([
     background: linear-gradient(45deg, rgba(255, 55, 29, 0.85), #ff8f29);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: fadeIn 1s ease-out;
+    animation: titleAppear 1s ease-out;
+    position: relative;
+    font-weight: 600;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(255, 55, 29, 0.5), transparent);
+      animation: lineAppear 1s ease-out 0.5s forwards;
+      opacity: 0;
+    }
   }
 
   .cards-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    gap: 2rem;
+    gap: 2.5rem;
     justify-items: center;
     padding: 1rem;
     max-width: 400px;
     margin: 0 auto;
+    perspective: 1000px;
 
     @media (min-width: 1200px) {
       grid-template-columns: repeat(3, 1fr);
       max-width: 1200px;
+      gap: 3rem;
     }
   }
 
@@ -100,40 +117,59 @@ const aiApps = ref([
     position: relative;
     width: 100%;
     max-width: 320px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 2rem;
+    border-radius: 24px;
+    padding: 2.5rem;
     text-decoration: none;
     color: inherit;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
     animation: cardAppear 0.6s ease-out forwards;
     opacity: 0;
     transform: translateY(20px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transform-style: preserve-3d;
 
     @for $i from 1 through 3 {
       &:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.2}s;
+        animation-delay: #{$i * 0.15}s;
       }
     }
 
     .dark & {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     &:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-10px) rotateX(8deg) rotateY(8deg);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
       
       .dark & {
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       }
 
       .icon {
-        transform: scale(1.1) rotate(5deg);
+        transform: scale(1.15) translateZ(20px) rotate(5deg);
+        color: rgba(255, 55, 29, 1);
+      }
+
+      h2 {
+        transform: translateZ(15px) scale(1.05);
+        color: rgba(255, 55, 29, 0.9);
+        letter-spacing: 0.5px;
+      }
+
+      p {
+        transform: translateZ(10px) scale(1.02);
+        color: #333;
+        
+        .dark & {
+          color: #bbb;
+        }
       }
     }
 
@@ -142,31 +178,40 @@ const aiApps = ref([
       flex-direction: column;
       align-items: center;
       text-align: center;
+      transform-style: preserve-3d;
+      transition: transform 0.4s ease;
     }
 
     .icon {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 1rem;
+      width: 56px;
+      height: 56px;
+      margin-bottom: 1.5rem;
       color: rgba(255, 55, 29, 0.85);
-      transition: transform 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
 
       &.heart-icon {
         color: rgba(255, 55, 29, 0.85);
-        animation: pulse 1.5s ease-in-out infinite;
+        animation: pulse 2s ease-in-out infinite;
       }
     }
 
     h2 {
       font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      transition: color 0.3s ease;
+      margin-bottom: 1rem;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 600;
+      transform-style: preserve-3d;
+      letter-spacing: 0;
     }
 
     p {
       color: #666;
       font-size: 1rem;
-      transition: color 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      line-height: 1.6;
+      font-weight: 400;
+      transform-style: preserve-3d;
 
       .dark & {
         color: #999;
@@ -187,14 +232,36 @@ const aiApps = ref([
   }
 }
 
-@keyframes fadeIn {
+@keyframes titleAppear {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes lineAppear {
+  from {
+    opacity: 0;
+    width: 0;
+  }
+  to {
+    opacity: 1;
+    width: 60px;
+  }
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(30px) rotateX(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
   }
 }
 
@@ -207,17 +274,6 @@ const aiApps = ref([
   }
   100% {
     transform: scale(1);
-  }
-}
-
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
