@@ -7,11 +7,6 @@ const routes = [
     component: () => import('../views/Home.vue')
   },
   {
-    path: '/ai-chat',
-    name: 'ChatPro',
-    component: () => import('../views/ChatPro.vue')
-  },
-  {
     path: '/damai-ai',
     name: 'DaMaiAI',
     component: () => import('../views/DaMaiAi.vue')

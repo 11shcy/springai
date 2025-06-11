@@ -36,22 +36,15 @@ const isDark = useDark()
 const aiApps = ref([
   {
     id: 1,
-    title: '简单聊天',
-    description: '与 AI 聊天玩儿',
-    route: '/ai-chat',
-    icon: ChatBubbleLeftRightIcon
-  },
-  {
-    id: 2,
     title: '大麦贴心助手',
-    description: '每天陪伴你，解决大麦项目的问题',
+    description: '帮你解决大麦业务相关的问题',
     route: '/damai-ai',
     icon: DamaiAssistantIcon
   },
   {
-    id: 3,
+    id: 2,
     title: '大麦规则助手',
-    description: '帮你解决大麦相关规则问题',
+    description: '帮你解决大麦规则相关的问题',
     route: '/damai-rag',
     icon: DamaiAssistantIcon
   }
@@ -107,8 +100,8 @@ const aiApps = ref([
     perspective: 1000px;
 
     @media (min-width: 1200px) {
-      grid-template-columns: repeat(3, 1fr);
-      max-width: 1200px;
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 800px;
       gap: 3rem;
     }
   }
