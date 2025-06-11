@@ -30,6 +30,7 @@ import {
   DocumentTextIcon
 } from '@heroicons/vue/24/outline'
 import DamaiAssistantIcon from '../components/icons/DamaiAssistantIcon.vue'
+import DamaiAssistantRobotIcon from '../components/icons/DamaiAssistantRobotIcon.vue'
 
 const isDark = useDark()
 
@@ -39,7 +40,7 @@ const aiApps = ref([
     title: '大麦贴心助手',
     description: '帮你解决大麦业务相关的问题',
     route: '/damai-ai',
-    icon: DamaiAssistantIcon
+    icon: DamaiAssistantRobotIcon
   },
   {
     id: 2,
@@ -147,7 +148,6 @@ const aiApps = ref([
 
       .icon {
         transform: scale(1.15) translateZ(20px) rotate(5deg);
-        color: rgba(255, 55, 29, 1);
       }
 
       h2 {
@@ -179,12 +179,10 @@ const aiApps = ref([
       width: 56px;
       height: 56px;
       margin-bottom: 1.5rem;
-      color: rgba(255, 55, 29, 0.85);
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       transform-style: preserve-3d;
 
       &.heart-icon {
-        color: rgba(255, 55, 29, 0.85);
         animation: pulse 2s ease-in-out infinite;
       }
     }
