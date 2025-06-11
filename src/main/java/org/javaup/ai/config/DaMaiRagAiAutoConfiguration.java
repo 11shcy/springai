@@ -1,13 +1,11 @@
 package org.javaup.ai.config;
 
 import org.javaup.ai.ai.rag.MarkdownLoader;
-import org.javaup.ai.ai.rag.MyKeywordEnricher;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.deepseek.DeepSeekChatModel;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -25,17 +23,11 @@ public class DaMaiRagAiAutoConfiguration {
     public MarkdownLoader markdownLoader(ResourcePatternResolver resourcePatternResolver){
         return new MarkdownLoader(resourcePatternResolver);
     }
-    
-    @Bean
-    public MyKeywordEnricher myKeywordEnricher(DeepSeekChatModel model){
-        return new MyKeywordEnricher(model);
-    }
-    
+
     @Bean
     public ChatClient markdownChatClient(OpenAiChatModel model, ChatMemory chatMemory, VectorStore vectorStore,
-                                         MarkdownLoader markdownLoader, MyKeywordEnricher myKeywordEnricher) {
+                                         MarkdownLoader markdownLoader) {
         List<Document> documentList = markdownLoader.loadMarkdowns();
-        //List<Document> enrichedDocuments = myKeywordEnricher.enrichDocuments(documentList);
         vectorStore.add(documentList);
         
         return ChatClient
