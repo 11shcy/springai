@@ -1,47 +1,47 @@
 <template>
-  <div class="ai-chat" :class="{ 'dark': isDark }">
+  <div class="ai-companion" :class="{ 'dark': isDark }">
     <div class="chat-container">
       <div class="sidebar">
         <div class="history-header">
-          <h2>聊天记录</h2>
-          <button class="new-chat" @click="startNewChat">
+          <h2>对话历史</h2>
+          <button class="new-chat" @click="initiateNewSession">
             <PlusIcon class="icon" />
-            新对话
+            新会话
           </button>
         </div>
         <div class="history-list">
           <div 
-            v-for="chat in chatHistory" 
-            :key="chat.id"
+            v-for="session in sessionHistory" 
+            :key="session.id"
             class="history-item"
-            :class="{ 'active': currentChatId === chat.id }"
-            @click="loadChat(chat.id)"
+            :class="{ 'active': activeSessionId === session.id }"
+            @click="switchSession(session.id)"
           >
             <ChatBubbleLeftRightIcon class="icon" />
-            <span class="title">{{ chat.title || '新对话' }}</span>
+            <span class="title">{{ session.title || '新会话' }}</span>
           </div>
         </div>
       </div>
       
       <div class="chat-main">
-        <div class="messages" ref="messagesRef">
+        <div class="messages" ref="messagesContainer">
           <ChatMessage
-            v-for="(message, index) in currentMessages"
+            v-for="(message, index) in activeMessages"
             :key="index"
             :message="message"
-            :is-stream="isStreaming && index === currentMessages.length - 1"
+            :is-stream="isProcessing && index === activeMessages.length - 1"
           />
         </div>
         
         <div class="input-area">
-          <div v-if="selectedFiles.length > 0" class="selected-files">
-            <div v-for="(file, index) in selectedFiles" :key="index" class="file-item">
+          <div v-if="attachedFiles.length > 0" class="selected-files">
+            <div v-for="(file, index) in attachedFiles" :key="index" class="file-item">
               <div class="file-info">
                 <DocumentIcon class="icon" />
                 <span class="file-name">{{ file.name }}</span>
                 <span class="file-size">({{ formatFileSize(file.size) }})</span>
               </div>
-              <button class="remove-btn" @click="removeFile(index)">
+              <button class="remove-btn" @click="detachFile(index)">
                 <XMarkIcon class="icon" />
               </button>
             </div>
@@ -51,32 +51,32 @@
             <div class="file-upload">
               <input 
                 type="file" 
-                ref="fileInput"
-                @change="handleFileUpload"
+                ref="fileSelector"
+                @change="handleFileSelection"
                 accept="image/*,audio/*,video/*"
                 multiple
                 class="hidden"
               >
               <button 
                 class="upload-btn"
-                @click="triggerFileInput"
-                :disabled="isStreaming"
+                @click="openFileSelector"
+                :disabled="isProcessing"
               >
                 <PaperClipIcon class="icon" />
               </button>
             </div>
 
             <textarea
-              v-model="userInput"
-              @keydown.enter.prevent="sendMessage"
-              :placeholder="getPlaceholder()"
+              v-model="userQuery"
+              @keydown.enter.prevent="submitMessage"
+              :placeholder="getInputPlaceholder()"
               rows="1"
-              ref="inputRef"
+              ref="queryInput"
             ></textarea>
             <button 
               class="send-button" 
-              @click="sendMessage"
-              :disabled="isStreaming || (!userInput.trim() && !selectedFiles.length)"
+              @click="submitMessage"
+              :disabled="isProcessing || (!userQuery.trim() && !attachedFiles.length)"
             >
               <PaperAirplaneIcon class="icon" />
             </button>
@@ -102,19 +102,19 @@ import ChatMessage from '../components/ChatMessage.vue'
 import { chatAPI } from '../services/api'
 
 const isDark = useDark()
-const messagesRef = ref(null)
-const inputRef = ref(null)
-const userInput = ref('')
-const isStreaming = ref(false)
-const currentChatId = ref(null)
-const currentMessages = ref([])
-const chatHistory = ref([])
-const fileInput = ref(null)
-const selectedFiles = ref([])
+const messagesContainer = ref(null)
+const queryInput = ref(null)
+const userQuery = ref('')
+const isProcessing = ref(false)
+const activeSessionId = ref(null)
+const activeMessages = ref([])
+const sessionHistory = ref([])
+const fileSelector = ref(null)
+const attachedFiles = ref([])
 
 // 自动调整输入框高度
 const adjustTextareaHeight = () => {
-  const textarea = inputRef.value
+  const textarea = queryInput.value
   if (textarea) {
     textarea.style.height = 'auto'
     textarea.style.height = textarea.scrollHeight + 'px'
@@ -126,13 +126,13 @@ const adjustTextareaHeight = () => {
 // 滚动到底部
 const scrollToBottom = async () => {
   await nextTick()
-  if (messagesRef.value) {
-    messagesRef.value.scrollTop = messagesRef.value.scrollHeight
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
 }
 
 // 文件类型限制
-const FILE_LIMITS = {
+const FILE_RESTRICTIONS = {
   image: { 
     maxSize: 10 * 1024 * 1024,  // 单个文件 10MB
     maxFiles: 3,                 // 最多 3 个文件
@@ -153,30 +153,30 @@ const FILE_LIMITS = {
 }
 
 // 触发文件选择
-const triggerFileInput = () => {
-  fileInput.value?.click()
+const openFileSelector = () => {
+  fileSelector.value?.click()
 }
 
 // 检查文件是否符合要求
 const validateFile = async (file) => {
   const type = file.type.split('/')[0]
-  const limit = FILE_LIMITS[type]
+  const restriction = FILE_RESTRICTIONS[type]
   
-  if (!limit) {
+  if (!restriction) {
     return { valid: false, error: '不支持的文件类型' }
   }
   
-  if (file.size > limit.maxSize) {
-    return { valid: false, error: `文件大小不能超过${limit.maxSize / 1024 / 1024}MB` }
+  if (file.size > restriction.maxSize) {
+    return { valid: false, error: `文件大小不能超过${restriction.maxSize / 1024 / 1024}MB` }
   }
   
-  if ((type === 'audio' || type === 'video') && limit.maxDuration) {
+  if ((type === 'audio' || type === 'video') && restriction.maxDuration) {
     try {
       const duration = await getMediaDuration(file)
-      if (duration > limit.maxDuration) {
+      if (duration > restriction.maxDuration) {
         return { 
           valid: false, 
-          error: `${type === 'audio' ? '音频' : '视频'}时长不能超过${limit.maxDuration}秒`
+          error: `${type === 'audio' ? '音频' : '视频'}时长不能超过${restriction.maxDuration}秒`
         }
       }
     } catch (error) {
@@ -208,7 +208,7 @@ const getMediaDuration = (file) => {
 }
 
 // 修改文件上传处理函数
-const handleFileUpload = async (event) => {
+const handleFileSelection = async (event) => {
   const files = Array.from(event.target.files || [])
   if (!files.length) return
   
@@ -228,62 +228,74 @@ const handleFileUpload = async (event) => {
     if (!valid) {
       alert(error)
       event.target.value = ''
-      selectedFiles.value = []
+      attachedFiles.value = []
       return
     }
   }
 
   // 检查文件总大小
   const totalSize = files.reduce((sum, file) => sum + file.size, 0)
-  const limit = FILE_LIMITS[firstFileType]
-  if (totalSize > limit.maxSize * 3) { // 允许最多3个文件的总大小
-    alert(`${firstFileType === 'image' ? '图片' : firstFileType === 'audio' ? '音频' : '视频'}文件总大小不能超过${(limit.maxSize * 3) / 1024 / 1024}MB`)
+  const restriction = FILE_RESTRICTIONS[firstFileType]
+  if (totalSize > restriction.maxSize * 3) { // 允许最多3个文件的总大小
+    alert(`${firstFileType === 'image' ? '图片' : firstFileType === 'audio' ? '音频' : '视频'}文件总大小不能超过${(restriction.maxSize * 3) / 1024 / 1024}MB`)
     event.target.value = ''
-    selectedFiles.value = []
+    attachedFiles.value = []
     return
   }
 
-  selectedFiles.value = files
+  attachedFiles.value = files
 }
 
 // 修改文件输入提示
-const getPlaceholder = () => {
-  if (selectedFiles.value.length > 0) {
-    const type = selectedFiles.value[0].type.split('/')[0]
-    const desc = FILE_LIMITS[type].description
-    return `已选择 ${selectedFiles.value.length} 个${desc}，可继续输入消息...`
+const getInputPlaceholder = () => {
+  if (attachedFiles.value.length > 0) {
+    const fileType = attachedFiles.value[0].type.split('/')[0]
+    return `已选择${attachedFiles.value.length}个${FILE_RESTRICTIONS[fileType].description}，请输入您的问题...`
   }
-  return '输入消息，可上传图片、音频或视频...'
+  return '请输入您的问题，或上传文件...'
 }
 
-// 修改发送消息函数
-const sendMessage = async () => {
-  if (isStreaming.value) return
-  if (!userInput.value.trim() && !selectedFiles.value.length) return
+// 移除文件
+const detachFile = (index) => {
+  attachedFiles.value.splice(index, 1)
+  if (fileSelector.value) {
+    fileSelector.value.value = ''
+  }
+}
+
+// 格式化文件大小
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// 发送消息
+const submitMessage = async () => {
+  if (isProcessing.value || (!userQuery.value.trim() && !attachedFiles.value.length)) return
   
-  const messageContent = userInput.value.trim()
+  const messageContent = userQuery.value.trim()
+  const files = [...attachedFiles.value]
+  
+  // 清空输入和文件
+  userQuery.value = ''
+  attachedFiles.value = []
+  if (fileSelector.value) {
+    fileSelector.value.value = ''
+  }
+  adjustTextareaHeight()
   
   // 添加用户消息
   const userMessage = {
     role: 'user',
     content: messageContent,
+    files: files,
     timestamp: new Date()
   }
-  currentMessages.value.push(userMessage)
-  
-  // 清空输入
-  userInput.value = ''
-  adjustTextareaHeight()
+  activeMessages.value.push(userMessage)
   await scrollToBottom()
-  
-  // 准备发送数据
-  const formData = new FormData()
-  if (messageContent) {
-    formData.append('prompt', messageContent)
-  }
-  selectedFiles.value.forEach(file => {
-    formData.append('files', file)
-  })
   
   // 添加助手消息占位
   const assistantMessage = {
@@ -291,153 +303,231 @@ const sendMessage = async () => {
     content: '',
     timestamp: new Date()
   }
-  currentMessages.value.push(assistantMessage)
-  isStreaming.value = true
+  activeMessages.value.push(assistantMessage)
+  isProcessing.value = true
   
   try {
-    const reader = await chatAPI.simpleChat(formData, currentChatId.value)
-    const decoder = new TextDecoder('utf-8')
-    let accumulatedContent = ''  // 添加累积内容变量
-    
-    while (true) {
-      try {
-        const { value, done } = await reader.read()
-        if (done) break
-        
-        // 累积新内容
-        accumulatedContent += decoder.decode(value)  // 追加新内容
-        
-        await nextTick(() => {
-          // 更新消息，使用累积的内容
-          const updatedMessage = {
-            ...assistantMessage,
-            content: accumulatedContent  // 使用累积的内容
-          }
-          const lastIndex = currentMessages.value.length - 1
-          currentMessages.value.splice(lastIndex, 1, updatedMessage)
-        })
-        await scrollToBottom()
-      } catch (readError) {
-        console.error('读取流错误:', readError)
-        break
-      }
-    }
+    const response = await chatAPI.sendMessage(messageContent, files, activeSessionId.value)
+    assistantMessage.content = response.content
   } catch (error) {
     console.error('发送消息失败:', error)
     assistantMessage.content = '抱歉，发生了错误，请稍后重试。'
   } finally {
-    isStreaming.value = false
-    selectedFiles.value = [] // 清空已选文件
-    fileInput.value.value = '' // 清空文件输入
+    isProcessing.value = false
     await scrollToBottom()
   }
 }
 
-// 加载特定对话
-const loadChat = async (chatId) => {
-  currentChatId.value = chatId
+// 加载特定会话
+const switchSession = async (sessionId) => {
+  activeSessionId.value = sessionId
   try {
-    const messages = await chatAPI.historyChatHistoryList(chatId, 1)
-    currentMessages.value = messages
+    const messages = await chatAPI.getSessionMessages(sessionId)
+    activeMessages.value = messages
   } catch (error) {
-    console.error('加载对话消息失败:', error)
-    currentMessages.value = []
+    console.error('加载会话消息失败:', error)
+    activeMessages.value = []
   }
 }
 
-// 加载聊天历史
-const loadChatHistory = async () => {
+// 加载会话历史
+const loadSessionHistory = async () => {
   try {
-    const history = await chatAPI.historyChatIdList(1)
-    chatHistory.value = history || []
+    const history = await chatAPI.getSessionHistory()
+    sessionHistory.value = history || []
     if (history && history.length > 0) {
-      await loadChat(history[0].id)
+      await switchSession(history[0].id)
     } else {
-      startNewChat()
+      await initiateNewSession()
     }
   } catch (error) {
-    console.error('加载聊天历史失败:', error)
-    chatHistory.value = []
-    startNewChat()
+    console.error('加载会话历史失败:', error)
+    sessionHistory.value = []
+    await initiateNewSession()
   }
 }
 
-// 开始新对话
-const startNewChat = () => {
-  const newChatId = Date.now().toString()
-  currentChatId.value = newChatId
-  currentMessages.value = []
+// 开始新会话
+const initiateNewSession = async () => {
+  const newSessionId = Date.now().toString()
+  activeSessionId.value = newSessionId
+  activeMessages.value = []
   
-  // 添加新对话到聊天历史列表
-  const newChat = {
-    id: newChatId,
-    title: `对话 ${newChatId.slice(-6)}`
+  // 添加新会话到历史列表
+  const newSession = {
+    id: newSessionId,
+    title: `会话 ${newSessionId.slice(-6)}`
   }
-  chatHistory.value = [newChat, ...chatHistory.value] // 将新对话添加到列表开头
-}
-
-// 格式化文件大小
-const formatFileSize = (bytes) => {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-}
-
-// 移除文件
-const removeFile = (index) => {
-  selectedFiles.value = selectedFiles.value.filter((_, i) => i !== index)
-  if (selectedFiles.value.length === 0) {
-    fileInput.value.value = ''  // 清空文件输入
-  }
+  sessionHistory.value = [newSession, ...sessionHistory.value]
+  
+  // 发送初始问候语
+  await submitMessage('你好，我是你的AI助手，有什么我可以帮你的吗？')
 }
 
 onMounted(() => {
-  loadChatHistory()
+  loadSessionHistory()
   adjustTextareaHeight()
 })
 </script>
 
 <style scoped lang="scss">
-.ai-chat {
-  position: fixed;  // 修改为固定定位
-  top: 64px;       // 导航栏高度
+.ai-companion {
+  margin-top: 64px;
+  position: fixed;
+  top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
+  background: #f5f5f5;
   display: flex;
-  background: var(--bg-color);
-  overflow: hidden; // 防止页面滚动
-
+  flex-direction: column;
+  
+  &.dark {
+    background: #1a1a1a;
+    color: #fff;
+    
+    .chat-container {
+      background: #2d2d2d;
+    }
+    
+    .sidebar {
+      background: #333;
+      border-right: 1px solid #444;
+      
+      .history-header {
+        border-bottom: 1px solid #444;
+        
+        h2 {
+          color: #fff;
+        }
+        
+        .new-chat {
+          background: #444;
+          color: #fff;
+          
+          &:hover {
+            background: #555;
+          }
+        }
+      }
+      
+      .history-list {
+        .history-item {
+          color: #ccc;
+          
+          &:hover {
+            background: #444;
+          }
+          
+          &.active {
+            background: #555;
+            color: #fff;
+          }
+        }
+      }
+    }
+    
+    .chat-main {
+      .messages {
+        .message {
+          &.user {
+            background: #444;
+          }
+          
+          &.assistant {
+            background: #333;
+          }
+        }
+      }
+      
+      .input-area {
+        background: #333;
+        border-top: 1px solid #444;
+        
+        .selected-files {
+          background: #444;
+          
+          .file-item {
+            border-bottom: 1px solid #555;
+            
+            .file-info {
+              color: #ccc;
+            }
+            
+            .remove-btn {
+              color: #999;
+              
+              &:hover {
+                color: #fff;
+              }
+            }
+          }
+        }
+        
+        .input-row {
+          .file-upload {
+            .upload-btn {
+              color: #999;
+              
+              &:hover {
+                color: #fff;
+              }
+            }
+          }
+          
+          textarea {
+            background: #444;
+            color: #fff;
+            
+            &::placeholder {
+              color: #999;
+            }
+          }
+          
+          .send-button {
+            color: #999;
+            
+            &:hover {
+              color: #fff;
+            }
+            
+            &:disabled {
+              color: #666;
+            }
+          }
+        }
+      }
+    }
+  }
+  
   .chat-container {
     flex: 1;
     display: flex;
-    max-width: 1800px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 1.5rem 2rem;
-    gap: 1.5rem;
-    height: 100%;    // 确保容器占满高度
-    overflow: hidden; // 防止容器滚动
+    background: #fff;
+    margin: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   }
-
+  
   .sidebar {
-    width: 300px;
+    width: 280px;
+    background: #f8f9fa;
+    border-right: 1px solid #e9ecef;
     display: flex;
     flex-direction: column;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     
     .history-header {
-      flex-shrink: 0;  // 防止头部压缩
       padding: 1rem;
+      border-bottom: 1px solid #e9ecef;
       display: flex;
       justify-content: space-between;
       align-items: center;
       
       h2 {
-        font-size: 1.25rem;
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
       }
       
       .new-chat {
@@ -445,364 +535,238 @@ onMounted(() => {
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        background: #007CF0;
-        color: white;
+        background: #e9ecef;
         border: none;
+        border-radius: 4px;
+        color: #495057;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.2s;
         
         &:hover {
-          background: #0066cc;
+          background: #dee2e6;
         }
         
         .icon {
-          width: 1.25rem;
-          height: 1.25rem;
+          width: 20px;
+          height: 20px;
         }
       }
     }
     
     .history-list {
       flex: 1;
-      overflow-y: auto;  // 允许历史记录滚动
-      padding: 0 1rem 1rem;
+      overflow-y: auto;
+      padding: 0.5rem;
       
       .history-item {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         padding: 0.75rem;
-        border-radius: 0.5rem;
+        border-radius: 4px;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.2s;
+        color: #495057;
         
         &:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: #e9ecef;
         }
         
         &.active {
-          background: rgba(0, 124, 240, 0.1);
+          background: #e9ecef;
+          color: #212529;
         }
         
         .icon {
-          width: 1.25rem;
-          height: 1.25rem;
+          width: 20px;
+          height: 20px;
+          color: #6c757d;
         }
         
         .title {
           flex: 1;
+          white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          white-space: nowrap;
         }
       }
     }
   }
-
+  
   .chat-main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    overflow: hidden;  // 防止内容溢出
+    background: #fff;
     
     .messages {
       flex: 1;
-      overflow-y: auto;  // 只允许消息区域滚动
-      padding: 2rem;
+      overflow-y: auto;
+      padding: 1rem;
+      
+      .message {
+        max-width: 80%;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        
+        &.user {
+          margin-left: auto;
+          background: #e9ecef;
+          color: #212529;
+        }
+        
+        &.assistant {
+          margin-right: auto;
+          background: #f8f9fa;
+          color: #212529;
+        }
+      }
     }
     
     .input-area {
-      flex-shrink: 0;
-      padding: 1.5rem 2rem;
-      background: rgba(255, 255, 255, 0.98);
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-
+      background: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      padding: 1rem;
+      
       .selected-files {
-        background: rgba(0, 0, 0, 0.02);
-        border-radius: 0.75rem;
-        padding: 0.75rem;
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        margin-bottom: 1rem;
         
         .file-item {
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 0.75rem;
-          background: #fff;
-          border-radius: 0.5rem;
-          margin-bottom: 0.75rem;
-          border: 1px solid rgba(0, 0, 0, 0.05);
-          transition: all 0.2s ease;
+          border-bottom: 1px solid #e9ecef;
           
           &:last-child {
-            margin-bottom: 0;
-          }
-          
-          &:hover {
-            background: rgba(0, 124, 240, 0.02);
-            border-color: rgba(0, 124, 240, 0.2);
+            border-bottom: none;
           }
           
           .file-info {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
+            color: #495057;
             
             .icon {
-              width: 1.5rem;
-              height: 1.5rem;
-              color: #007CF0;
+              width: 20px;
+              height: 20px;
+              color: #6c757d;
             }
             
             .file-name {
-              font-size: 0.875rem;
-              color: #333;
               font-weight: 500;
             }
             
             .file-size {
-              font-size: 0.75rem;
-              color: #666;
-              background: rgba(0, 0, 0, 0.05);
-              padding: 0.25rem 0.5rem;
-              border-radius: 1rem;
+              color: #6c757d;
             }
           }
           
           .remove-btn {
-            padding: 0.375rem;
+            background: none;
             border: none;
-            background: rgba(0, 0, 0, 0.05);
-            color: #666;
+            padding: 0.25rem;
+            color: #6c757d;
             cursor: pointer;
-            border-radius: 0.375rem;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             
             &:hover {
-              background: #ff4d4f;
-              color: #fff;
+              color: #dc3545;
             }
             
             .icon {
-              width: 1.25rem;
-              height: 1.25rem;
+              width: 20px;
+              height: 20px;
             }
           }
         }
       }
-
+      
       .input-row {
         display: flex;
-        gap: 1rem;
-        align-items: flex-end;
-        background: #fff;
-        padding: 0.75rem;
-        border-radius: 1rem;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
+        gap: 0.5rem;
+        
         .file-upload {
+          position: relative;
+          
           .hidden {
             display: none;
           }
           
           .upload-btn {
-            width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: none;
             border: none;
-            border-radius: 0.75rem;
-            background: rgba(0, 124, 240, 0.1);
-            color: #007CF0;
+            padding: 0.5rem;
+            color: #6c757d;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             
-            &:hover:not(:disabled) {
-              background: rgba(0, 124, 240, 0.2);
+            &:hover {
+              color: #495057;
             }
             
             &:disabled {
-              opacity: 0.5;
+              color: #adb5bd;
               cursor: not-allowed;
             }
             
             .icon {
-              width: 1.25rem;
-              height: 1.25rem;
+              width: 24px;
+              height: 24px;
             }
           }
         }
-
+        
         textarea {
           flex: 1;
-          resize: none;
-          border: none;
-          background: transparent;
+          min-height: 50px;
+          max-height: 200px;
           padding: 0.75rem;
-          color: inherit;
+          border: 1px solid #e9ecef;
+          border-radius: 4px;
+          resize: none;
           font-family: inherit;
           font-size: 1rem;
           line-height: 1.5;
-          max-height: 150px;
+          color: #212529;
           
           &:focus {
             outline: none;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
           }
           
           &::placeholder {
-            color: #999;
+            color: #adb5bd;
           }
         }
         
         .send-button {
-          width: 2.5rem;
-          height: 2.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          background: none;
           border: none;
-          border-radius: 0.75rem;
-          background: #007CF0;
-          color: white;
+          padding: 0.5rem;
+          color: #6c757d;
           cursor: pointer;
-          transition: all 0.2s ease;
+          transition: all 0.2s;
           
-          &:hover:not(:disabled) {
-            background: #0066cc;
-            transform: translateY(-1px);
+          &:hover {
+            color: #495057;
           }
           
           &:disabled {
-            background: #ccc;
+            color: #adb5bd;
             cursor: not-allowed;
           }
           
           .icon {
-            width: 1.25rem;
-            height: 1.25rem;
+            width: 24px;
+            height: 24px;
           }
-        }
-      }
-    }
-  }
-}
-
-.dark {
-  .sidebar {
-    background: rgba(40, 40, 40, 0.95);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  }
-  
-  .chat-main {
-    background: rgba(40, 40, 40, 0.95);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    
-    .input-area {
-      background: rgba(30, 30, 30, 0.98);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      
-      .selected-files {
-        background: rgba(255, 255, 255, 0.02);
-        border-color: rgba(255, 255, 255, 0.05);
-        
-        .file-item {
-          background: rgba(255, 255, 255, 0.02);
-          border-color: rgba(255, 255, 255, 0.05);
-          
-          &:hover {
-            background: rgba(0, 124, 240, 0.1);
-            border-color: rgba(0, 124, 240, 0.3);
-          }
-          
-          .file-info {
-            .icon {
-              color: #007CF0;
-            }
-            
-            .file-name {
-              color: #fff;
-            }
-            
-            .file-size {
-              color: #999;
-              background: rgba(255, 255, 255, 0.1);
-            }
-          }
-          
-          .remove-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: #999;
-            
-            &:hover {
-              background: #ff4d4f;
-              color: #fff;
-            }
-          }
-        }
-      }
-
-      .input-row {
-        background: rgba(255, 255, 255, 0.02);
-        border-color: rgba(255, 255, 255, 0.05);
-        box-shadow: none;
-
-        textarea {
-          color: #fff;
-          
-          &::placeholder {
-            color: #666;
-          }
-        }
-
-        .file-upload .upload-btn {
-          background: rgba(0, 124, 240, 0.2);
-          color: #007CF0;
-          
-          &:hover:not(:disabled) {
-            background: rgba(0, 124, 240, 0.3);
-          }
-        }
-      }
-    }
-  }
-  
-  .history-item {
-    &:hover {
-      background: rgba(255, 255, 255, 0.05) !important;
-    }
-    
-    &.active {
-      background: rgba(0, 124, 240, 0.2) !important;
-    }
-  }
-  
-  textarea {
-    background: rgba(255, 255, 255, 0.05) !important;
-    
-    &:focus {
-      background: rgba(255, 255, 255, 0.1) !important;
-    }
-  }
-
-  .input-area {
-    .file-upload {
-      .upload-btn {
-        background: rgba(255, 255, 255, 0.1);
-        color: #999;
-        
-        &:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.2);
-          color: #fff;
         }
       }
     }
@@ -810,17 +774,23 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .ai-chat {
+  .ai-companion {
     .chat-container {
-      padding: 0;
+      margin: 0;
+      border-radius: 0;
     }
     
     .sidebar {
-      display: none; // 在移动端隐藏侧边栏
-    }
-    
-    .chat-main {
-      border-radius: 0;
+      position: fixed;
+      left: -280px;
+      top: 64px;
+      bottom: 0;
+      z-index: 1000;
+      transition: left 0.3s;
+      
+      &.show {
+        left: 0;
+      }
     }
   }
 }

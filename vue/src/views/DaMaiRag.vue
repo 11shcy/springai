@@ -1,27 +1,27 @@
 <template>
-  <div class="customer-service" :class="{ 'dark': isDark }">
+  <div class="smart-assistant" :class="{ 'dark': isDark }">
     <div class="chat-container">
       <div class="sidebar">
         <div class="history-header">
-          <h2>聊天记录</h2>
-          <button class="new-chat" @click="startNewChat">
+          <h2>对话历史</h2>
+          <button class="new-chat" @click="initiateNewConversation">
             <PlusIcon class="icon" :size="24" />
-            新的聊天
+            开始新对话
           </button>
         </div>
         <div class="history-list">
           <div 
-            v-for="chat in chatHistory" 
+            v-for="chat in conversationHistory" 
             :key="chat.id"
             class="history-item"
-            :class="{ 'active': currentChatId === chat.id }"
-            @click="loadChat(chat.id)"
+            :class="{ 'active': activeConversationId === chat.id }"
+            @click="switchConversation(chat.id)"
           >
             <ChatBubbleIcon class="icon" :size="24" />
-            <span class="title">{{ chat.title || '新的聊天' }}</span>
+            <span class="title">{{ chat.title || '新对话' }}</span>
             <button 
               class="delete-btn" 
-              @click.stop="deleteChat(chat.id)"
+              @click.stop="removeConversation(chat.id)"
               title="删除对话"
             >
               <TrashIcon class="icon" :size="20" />
@@ -35,33 +35,33 @@
           <div class="service-info">
             <LaptopIcon class="avatar" :size="48" />
             <div class="info">
-              <h3>麦小蜜</h3>
-              <p>大麦系统规则助手</p>
+              <h3>智能助手</h3>
+              <p>您的专属AI顾问</p>
             </div>
           </div>
         </div>
 
-        <div class="messages" ref="messagesRef">
+        <div class="messages" ref="messagesContainer">
           <ChatMessage
-            v-for="(message, index) in currentMessages"
+            v-for="(message, index) in activeMessages"
             :key="index"
             :message="message"
-            :is-stream="isStreaming && index === currentMessages.length - 1"
+            :is-stream="isProcessing && index === activeMessages.length - 1"
           />
         </div>
         
         <div class="input-area">
           <textarea
-            v-model="userInput"
-            @keydown.enter.prevent="sendMessage()"
-            placeholder="请描述您的问题，麦小蜜会帮您解答哦..."
+            v-model="userQuery"
+            @keydown.enter.prevent="submitMessage()"
+            placeholder="请输入您的问题，我会为您提供专业的解答..."
             rows="1"
-            ref="inputRef"
+            ref="queryInput"
           ></textarea>
           <button 
             class="send-button" 
-            @click="sendMessage()"
-            :disabled="isStreaming || !userInput.trim()"
+            @click="submitMessage()"
+            :disabled="isProcessing || !userQuery.trim()"
           >
             <SendIcon class="icon" :size="40" />
           </button>
@@ -69,12 +69,12 @@
       </div>
     </div>
 
-    <!-- 生成订单成功弹窗 -->
-    <div v-if="createOrderModal" class="create-order-modal">
+    <!-- 订单确认弹窗 -->
+    <div v-if="showOrderConfirmation" class="order-confirmation-modal">
       <div class="modal-content">
-        <h3>生成订单成功！</h3>
-        <div class="create-order-info" v-html="bookingInfo"></div>
-        <button @click="createOrderModal = false">确定</button>
+        <h3>订单已生成！</h3>
+        <div class="order-details" v-html="orderDetails"></div>
+        <button @click="showOrderConfirmation = false">确认</button>
       </div>
     </div>
   </div>
@@ -94,15 +94,15 @@ import SendIcon from '../components/icons/SendIcon.vue'
 import TrashIcon from '../components/icons/TrashIcon.vue'
 
 const isDark = useDark()
-const messagesRef = ref(null)
-const inputRef = ref(null)
-const userInput = ref('')
-const isStreaming = ref(false)
-const currentChatId = ref(null)
-const currentMessages = ref([])
-const chatHistory = ref([])
-const createOrderModal = ref(false)
-const bookingInfo = ref('')
+const messagesContainer = ref(null)
+const queryInput = ref(null)
+const userQuery = ref('')
+const isProcessing = ref(false)
+const activeConversationId = ref(null)
+const activeMessages = ref([])
+const conversationHistory = ref([])
+const showOrderConfirmation = ref(false)
+const orderDetails = ref('')
 
 // 配置 marked
 marked.setOptions({
@@ -113,7 +113,7 @@ marked.setOptions({
 
 // 自动调整输入框高度
 const adjustTextareaHeight = () => {
-  const textarea = inputRef.value
+  const textarea = queryInput.value
   if (textarea) {
     textarea.style.height = 'auto'
     textarea.style.height = textarea.scrollHeight + 'px'
@@ -123,17 +123,17 @@ const adjustTextareaHeight = () => {
 // 滚动到底部
 const scrollToBottom = async () => {
   await nextTick()
-  if (messagesRef.value) {
-    messagesRef.value.scrollTop = messagesRef.value.scrollHeight
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   }
 }
 
 // 发送消息
-const sendMessage = async (content) => {
-  if (isStreaming.value || (!content && !userInput.value.trim())) return
+const submitMessage = async (content) => {
+  if (isProcessing.value || (!content && !userQuery.value.trim())) return
   
   // 使用传入的 content 或用户输入框的内容
-  const messageContent = content || userInput.value.trim()
+  const messageContent = content || userQuery.value.trim()
   
   // 添加用户消息
   const userMessage = {
@@ -141,11 +141,11 @@ const sendMessage = async (content) => {
     content: messageContent,
     timestamp: new Date()
   }
-  currentMessages.value.push(userMessage)
+  activeMessages.value.push(userMessage)
   
   // 清空输入
   if (!content) {  // 只有在非传入内容时才清空输入框
-    userInput.value = ''
+    userQuery.value = ''
     adjustTextareaHeight()
   }
   await scrollToBottom()
@@ -157,13 +157,13 @@ const sendMessage = async (content) => {
     timestamp: new Date(),
     isMarkdown: true  // 添加标记表示这是 Markdown 内容
   }
-  currentMessages.value.push(assistantMessage)
-  isStreaming.value = true
+  activeMessages.value.push(assistantMessage)
+  isProcessing.value = true
   
   let totalContent = ''
   
   try {
-    const reader = await chatAPI.sendRagMessage(messageContent, currentChatId.value)
+    const reader = await chatAPI.sendRagMessage(messageContent, activeConversationId.value)
     const decoder = new TextDecoder('utf-8')
     
     while (true) {
@@ -181,8 +181,8 @@ const sendMessage = async (content) => {
             content: totalContent,
             isMarkdown: true  // 保持 Markdown 标记
           }
-          const lastIndex = currentMessages.value.length - 1
-          currentMessages.value.splice(lastIndex, 1, updatedMessage)
+          const lastIndex = activeMessages.value.length - 1
+          activeMessages.value.splice(lastIndex, 1, updatedMessage)
         })
         await scrollToBottom()
       } catch (readError) {
@@ -196,76 +196,76 @@ const sendMessage = async (content) => {
       const createOrderMatch = totalContent.match(/【(.*?)】/s)
       if (createOrderMatch) {
         // 使用 marked 处理预约信息中的 Markdown
-        bookingInfo.value = DOMPurify.sanitize(
+        orderDetails.value = DOMPurify.sanitize(
           marked.parse(createOrderMatch[1]),
           {
             ADD_TAGS: ['code', 'pre', 'span'],
             ADD_ATTR: ['class', 'language']
           }
         )
-        createOrderModal.value = true
+        showOrderConfirmation.value = true
       }
     }
   } catch (error) {
     console.error('发送消息失败:', error)
     assistantMessage.content = '抱歉，发生了错误，请稍后重试。'
   } finally {
-    isStreaming.value = false
+    isProcessing.value = false
     await scrollToBottom()
   }
 }
 
 // 加载特定对话
-const loadChat = async (chatId) => {
-  currentChatId.value = chatId
+const switchConversation = async (chatId) => {
+  activeConversationId.value = chatId
   try {
     const messages = await chatAPI.historyChatHistoryList(chatId, 3)
-    currentMessages.value = messages.map(msg => ({
+    activeMessages.value = messages.map(msg => ({
       ...msg,
       isMarkdown: msg.role === 'assistant'  // 为助手消息添加 Markdown 标记
     }))
   } catch (error) {
     console.error('加载对话消息失败:', error)
-    currentMessages.value = []
+    activeMessages.value = []
   }
 }
 
 // 加载聊天历史
-const loadChatHistory = async () => {
+const loadConversationHistory = async () => {
   try {
     const history = await chatAPI.historyChatIdList(3)
-    chatHistory.value = history || []
+    conversationHistory.value = history || []
     if (history && history.length > 0) {
-      await loadChat(history[0].id)
+      await switchConversation(history[0].id)
     } else {
-      await startNewChat()  // 等待 startNewChat 完成
+      await initiateNewConversation()  // 等待 initiateNewConversation 完成
     }
   } catch (error) {
     console.error('加载聊天历史失败:', error)
-    chatHistory.value = []
-    await startNewChat()  // 等待 startNewChat 完成
+    conversationHistory.value = []
+    await initiateNewConversation()  // 等待 initiateNewConversation 完成
   }
 }
 
 // 开始新对话
-const startNewChat = async () => {  // 添加 async
+const initiateNewConversation = async () => {  // 添加 async
   const newChatId = Date.now().toString()
-  currentChatId.value = newChatId
-  currentMessages.value = []
+  activeConversationId.value = newChatId
+  activeMessages.value = []
   
   // 添加新对话到历史列表
   const newChat = {
     id: newChatId,
     title: `咨询 ${newChatId.slice(-6)}`
   }
-  chatHistory.value = [newChat, ...chatHistory.value]
+  conversationHistory.value = [newChat, ...conversationHistory.value]
 
   // 发送初始问候语
-  await sendMessage('你好啊，麦小蜜')
+  await submitMessage('你好啊，智能助手')
 }
 
 // 删除对话
-const deleteChat = async (chatId) => {
+const removeConversation = async (chatId) => {
   if (!confirm('确定要删除这个对话吗？')) {
     return
   }
@@ -273,11 +273,11 @@ const deleteChat = async (chatId) => {
   try {
     await chatAPI.deleteChat(chatId,3)
     // 从历史记录中移除
-    chatHistory.value = chatHistory.value.filter(chat => chat.id !== chatId)
+    conversationHistory.value = conversationHistory.value.filter(chat => chat.id !== chatId)
     
     // 如果删除的是当前对话，则创建新对话
-    if (currentChatId.value === chatId) {
-      await startNewChat()
+    if (activeConversationId.value === chatId) {
+      await initiateNewConversation()
     }
   } catch (error) {
     console.error('删除对话失败:', error)
@@ -286,13 +286,14 @@ const deleteChat = async (chatId) => {
 }
 
 onMounted(() => {
-  loadChatHistory()
+  loadConversationHistory()
   adjustTextareaHeight()
 })
 </script>
 
 <style scoped lang="scss">
-.customer-service {
+.smart-assistant {
+  margin-top: 64px;
   position: fixed;
   top: 64px;
   left: 0;
@@ -537,7 +538,7 @@ onMounted(() => {
     }
   }
 
-  .create-order-modal {
+  .order-confirmation-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -563,7 +564,7 @@ onMounted(() => {
         color: #333;
       }
 
-      .create-order-info {
+      .order-details {
         margin: 1.5rem 0;
         text-align: left;
         line-height: 1.6;
@@ -634,14 +635,14 @@ onMounted(() => {
     }
   }
 
-  .create-order-modal .modal-content {
+  .order-confirmation-modal .modal-content {
     background: #333;
 
     h3 {
       color: #fff;
     }
 
-    .create-order-info {
+    .order-details {
       color: #ccc;
     }
 
@@ -656,7 +657,7 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .customer-service {
+  .smart-assistant {
     .chat-container {
       padding: 0;
     }
