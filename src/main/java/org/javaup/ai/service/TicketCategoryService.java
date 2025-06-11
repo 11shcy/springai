@@ -9,7 +9,6 @@ import org.javaup.ai.vo.TicketCategoryDetailVo;
 import org.javaup.ai.vo.result.TicketCategoryListResultVo;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,7 +18,6 @@ import static org.javaup.ai.constants.DaMaiConstant.TICKET_LIST_URL;
 public class TicketCategoryService {
 
     public List<TicketCategoryDetailVo> selectListByProgram(TicketCategoryListByProgramDto ticketCategoryListByProgramDto) {
-        List<TicketCategoryDetailVo> ticketCategoryDetailVoList = new ArrayList<>();
         String result = HttpRequest.post(TICKET_LIST_URL)
                 .header("no_verify", "true")
                 .body(JSON.toJSONString(ticketCategoryListByProgramDto))

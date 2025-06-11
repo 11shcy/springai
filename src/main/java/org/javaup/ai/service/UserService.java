@@ -8,8 +8,6 @@ import org.javaup.ai.vo.UserDetailVo;
 import org.javaup.ai.vo.result.TicketUserResultVo;
 import org.javaup.ai.vo.result.UserDetailResultVo;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +36,6 @@ public class UserService {
     }
     
     public List<TicketUserVo> ticketUserList(Long userId){
-        List<TicketUserVo> ticketUserVoList = new ArrayList<>();
         Map<String,Object> params = new HashMap<>(2);
         params.put("userId", userId);
         TicketUserResultVo ticketUserResultVo = new TicketUserResultVo();

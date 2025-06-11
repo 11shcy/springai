@@ -295,7 +295,7 @@ const sendMessage = async () => {
   isStreaming.value = true
   
   try {
-    const reader = await chatAPI.sendMessage(formData, currentChatId.value)
+    const reader = await chatAPI.simpleChat(formData, currentChatId.value)
     const decoder = new TextDecoder('utf-8')
     let accumulatedContent = ''  // 添加累积内容变量
     
@@ -337,7 +337,7 @@ const sendMessage = async () => {
 const loadChat = async (chatId) => {
   currentChatId.value = chatId
   try {
-    const messages = await chatAPI.getChatMessages(chatId, 1)
+    const messages = await chatAPI.historyChatHistoryList(chatId, 1)
     currentMessages.value = messages
   } catch (error) {
     console.error('加载对话消息失败:', error)
@@ -348,7 +348,7 @@ const loadChat = async (chatId) => {
 // 加载聊天历史
 const loadChatHistory = async () => {
   try {
-    const history = await chatAPI.getChatHistory(1)
+    const history = await chatAPI.historyChatIdList(1)
     chatHistory.value = history || []
     if (history && history.length > 0) {
       await loadChat(history[0].id)

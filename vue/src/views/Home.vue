@@ -1,7 +1,7 @@
 <template>
   <div class="home" :class="{ 'dark': isDark }">
     <div class="container">
-      <h1 class="title">大麦 AI 应用</h1>
+      <h1 class="title">具体 AI 应用</h1>
       <div class="cards-grid">
         <router-link 
           v-for="app in aiApps" 
@@ -36,42 +36,20 @@ const isDark = useDark()
 const aiApps = ref([
   {
     id: 1,
-    title: 'AI 聊天',
-    description: '多模态对话机器人，支持图片、音频等',
+    title: '简单聊天',
+    description: '与 AI 聊天玩儿',
     route: '/ai-chat',
     icon: ChatBubbleLeftRightIcon
   },
   {
     id: 2,
-    title: '哄哄模拟器',
-    description: '一个帮助你练习哄女朋友开心的小游戏',
-    route: '/game',
-    icon: HeartIcon,
-    iconClass: 'heart-icon'
-  },
-  {
-    id: 3,
-    title: '黑马智能客服',
-    description: '24小时在线的智能课程咨询师',
-    route: '/customer-service',
-    icon: UserGroupIcon
-  },
-  {
-    id: 4,
-    title: 'ChatPDF',
-    description: '打造你的个人知识库，与知识库自由对话',
-    route: '/chat-pdf',
-    icon: DocumentTextIcon
-  },
-  {
-    id: 5,
     title: '大麦贴心助手',
     description: '每天陪伴你，解决大麦项目的问题',
     route: '/damai-ai',
     icon: DamaiAssistantIcon
   },
   {
-    id: 5,
+    id: 3,
     title: '大麦规则助手',
     description: '帮你解决大麦相关规则问题',
     route: '/damai-rag',

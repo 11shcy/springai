@@ -2,9 +2,9 @@ const BASE_URL = 'http://localhost:6084'
 
 export const chatAPI = {
   // 发送聊天消息
-  async sendMessage(data, chatId) {
+  async simpleChat(data, chatId) {
     try {
-      const url = new URL(`${BASE_URL}/ai/chat`)
+      const url = new URL(`${BASE_URL}/simple/chat`)
       if (chatId) {
         url.searchParams.append('chatId', chatId)
       }
@@ -26,10 +26,10 @@ export const chatAPI = {
     }
   },
 
-  // 获取聊天历史列表
-  async getChatHistory(type = 1) {  // 添加类型参数
+  // 获取聊天的历史会话id列表
+  async historyChatIdList(type = 1) {  // 添加类型参数
     try {
-      const response = await fetch(`${BASE_URL}/ai/history/chatId/list?type=${type}`)
+      const response = await fetch(`${BASE_URL}/history/chatId/list?type=${type}`)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -47,10 +47,10 @@ export const chatAPI = {
     }
   },
 
-  // 获取特定对话的消息历史
-  async getChatMessages(chatId, type = 1) {  // 添加类型参数
+  // 获取具体对话下的历史消息
+  async historyChatHistoryList(chatId, type = 1) {  // 添加类型参数
     try {
-      const response = await fetch(`${BASE_URL}/ai/history/chatHistory/list?chatId=${chatId}&type=${type}`)
+      const response = await fetch(`${BASE_URL}/history/chatHistory/list?chatId=${chatId}&type=${type}`)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -65,67 +65,10 @@ export const chatAPI = {
       return []
     }
   },
-
-  // 发送游戏消息
-  async sendGameMessage(prompt, chatId) {
-    try {
-      const response = await fetch(`${BASE_URL}/ai/game?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
-        method: 'GET',
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return response.body.getReader()
-    } catch (error) {
-      console.error('API Error:', error)
-      throw error
-    }
-  },
-
-  // 发送客服消息
-  async sendServiceMessage(prompt, chatId) {
-    try {
-      const response = await fetch(`${BASE_URL}/ai/service?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
-        method: 'GET',
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return response.body.getReader()
-    } catch (error) {
-      console.error('API Error:', error)
-      throw error
-    }
-  },
-
-  // 发送 PDF 问答消息
-  async sendPdfMessage(prompt, chatId) {
-    try {
-      const response = await fetch(`${BASE_URL}/ai/pdf/chat?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
-        method: 'GET',
-        // 确保使用流式响应
-        signal: AbortSignal.timeout(30000) // 30秒超时
-      })
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
-      }
-
-      // 返回可读流
-      return response.body.getReader()
-    } catch (error) {
-      console.error('API Error:', error)
-      throw error
-    }
-  },
   // 发送助手消息
   async sendAssistantMessage(prompt, chatId) {
     try {
-      const response = await fetch(`${BASE_URL}/program/ai?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
+      const response = await fetch(`${BASE_URL}/program/chat?prompt=${encodeURIComponent(prompt)}&chatId=${chatId}`, {
         method: 'GET',
       })
 
@@ -159,7 +102,7 @@ export const chatAPI = {
   // 删除对话
   async deleteChat(chatId, type = 1) {
     try {
-      const response = await fetch(`${BASE_URL}/ai/history/delete?chatId=${chatId}&type=${type}`, {
+      const response = await fetch(`${BASE_URL}/history/delete?chatId=${chatId}&type=${type}`, {
         method: 'GET',
       })
 

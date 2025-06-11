@@ -42,8 +42,8 @@ public class ProgramController {
     @Autowired
     private ChatHistoryService chatHistoryService;
 
-    @RequestMapping(value = "/ai", produces = "text/html;charset=utf-8")
-    public Flux<String> ai(@RequestParam("prompt") String prompt,
+    @RequestMapping(value = "/chat", produces = "text/html;charset=utf-8")
+    public Flux<String> chat(@RequestParam("prompt") String prompt,
                                 @RequestParam("chatId") String chatId) {
         // 1.保存会话id
         chatHistoryService.save(ChatType.ASSISTANT.getCode(), chatId);

@@ -3,9 +3,7 @@ package org.javaup.ai.test;
 import cn.hutool.core.collection.CollectionUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.javaup.ai.ai.rag.MarkdownLoader;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +16,7 @@ import java.util.List;
 public class RagAiTest {
     
     @Autowired
-    private OpenAiEmbeddingModel embeddingModel;
-    
-    @Autowired
     private VectorStore vectorStore;
-    
-    @Autowired
-    private MarkdownLoader markdownLoader;
     
     @PostConstruct
     public void testVectorStore(){

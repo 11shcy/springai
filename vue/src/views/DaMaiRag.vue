@@ -219,7 +219,7 @@ const sendMessage = async (content) => {
 const loadChat = async (chatId) => {
   currentChatId.value = chatId
   try {
-    const messages = await chatAPI.getChatMessages(chatId, 3)
+    const messages = await chatAPI.historyChatHistoryList(chatId, 3)
     currentMessages.value = messages.map(msg => ({
       ...msg,
       isMarkdown: msg.role === 'assistant'  // 为助手消息添加 Markdown 标记
@@ -233,7 +233,7 @@ const loadChat = async (chatId) => {
 // 加载聊天历史
 const loadChatHistory = async () => {
   try {
-    const history = await chatAPI.getChatHistory(3)
+    const history = await chatAPI.historyChatIdList(3)
     chatHistory.value = history || []
     if (history && history.length > 0) {
       await loadChat(history[0].id)

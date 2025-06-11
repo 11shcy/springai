@@ -14,7 +14,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/ai/history")
+@RequestMapping("/history")
 public class ChatHistoryController {
 
     private final ChatHistoryService chatHistoryService;
@@ -22,7 +22,7 @@ public class ChatHistoryController {
     private final ChatMemory chatMemory;
 
     @RequestMapping("/chatId/list")
-    public List<String> getChatIds(@RequestParam("type") Integer type) {
+    public List<String> getChatIdList(@RequestParam("type") Integer type) {
         return chatHistoryService.getChatIdList(type);
     }
 
