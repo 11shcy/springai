@@ -27,29 +27,43 @@ router.beforeEach((to, from, next) => {
 <template>
   <div class="app" :class="{ 'dark': isDark }">
     <nav class="navbar">
-      <router-link to="/" class="logo">大麦 AI</router-link>
-      <button @click="toggleDark()" class="theme-toggle">
+      <router-link to="/" class="logo">
+        <span class="logo-text">大麦 AI</span>
+      </router-link>
+      <button @click="toggleDark()" class="theme-toggle" aria-label="切换主题">
         <SunIcon v-if="isDark" class="icon" />
         <MoonIcon v-else class="icon" />
       </button>
     </nav>
-    <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
+    <main class="main-content">
+      <router-view v-slot="{ Component }">
+        <transition name="page" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </main>
   </div>
 </template>
 
 <style lang="scss">
 :root {
-  --bg-color: #f5f5f5;
-  --text-color: #333;
+  --primary-color: #ff3b1d;
+  --primary-light: rgba(255, 59, 29, 0.1);
+  --bg-color: #ffffff;
+  --text-color: #2c3e50;
+  --border-color: #eaeaea;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
 }
 
 .dark {
   --bg-color: #1a1a1a;
-  --text-color: #fff;
+  --text-color: #ffffff;
+  --border-color: #2c2c2c;
+  --primary-light: rgba(255, 59, 29, 0.15);
 }
 
 * {
@@ -68,6 +82,7 @@ body {
   color: var(--text-color);
   background: var(--bg-color);
   min-height: 100vh;
+  line-height: 1.6;
 }
 
 .app {
@@ -77,72 +92,115 @@ body {
 }
 
 .navbar {
-  margin-top: 18px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 90vw;
-  max-width: 1200px;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  margin: 1.5rem auto;
+  width: 92vw;
+  max-width: 1280px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-color);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  height: 64px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
 }
 
-.navbar .logo {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: #ff3b1d;
-  background: none;
-  -webkit-text-fill-color: unset;
-  text-shadow: 0 2px 8px rgba(255,59,29,0.08);
-  padding: 0;
-  margin: 0;
-  line-height: 60px;
+.logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  
+  .logo-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary-color), #ff6b3d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+    position: relative;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+      text-shadow: 0 0 20px rgba(255, 59, 29, 0.2);
+    }
+  }
 }
 
 .theme-toggle {
-  background: none;
+  background: var(--primary-light);
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.6rem;
   border-radius: 50%;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+    background: var(--primary-color);
+    
+    .icon {
+      color: white;
+    }
   }
 
   .icon {
-    width: 24px;
-    height: 24px;
-    color: var(--text-color);
+    width: 22px;
+    height: 22px;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.main-content {
+  flex: 1;
+  width: 92vw;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-enter-from {
   opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 1rem;
+    margin: 1rem auto;
+    padding: 0 1.25rem;
+    height: 56px;
+  }
+  
+  .logo .logo-text {
+    font-size: 1.25rem;
+  }
+  
+  .main-content {
+    width: 100%;
+    padding: 0 1rem;
   }
 }
 </style>
+
