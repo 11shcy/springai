@@ -42,7 +42,7 @@
         </div>
 
         <div class="messages" ref="messagesContainer">
-          <ChatMessage
+          <Chat
             v-for="(message, index) in activeMessages"
             :key="index"
             :message="message"
@@ -85,8 +85,8 @@ import { ref, onMounted, nextTick } from 'vue'
 import { useDark } from '@vueuse/core'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import ChatMessage from '../components/ChatMessage.vue'
-import { chatAPI } from '../services/api'
+import Chat from '../components/Chat.vue'
+import { chatAPI } from '../api/api'
 import LaptopIcon from '../components/icons/LaptopIcon.vue'
 import ChatBubbleIcon from '../components/icons/ChatBubbleIcon.vue'
 import PlusIcon from '../components/icons/PlusIcon.vue'
