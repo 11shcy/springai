@@ -6,6 +6,7 @@ import org.javaup.ai.utils.StringUtil;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.markdown.MarkdownDocumentReader;
 import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig;
+import org.springframework.ai.reader.markdown.config.MarkdownDocumentReaderConfig.Builder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
@@ -34,23 +35,27 @@ public class MarkdownLoader {
                 String fileName = resource.getFilename();
                 log.info("正在处理文件: {}", fileName);
                 
-                String status = fileName;
+                String label = fileName;
                 if (StringUtil.isNotEmpty(fileName)) {
                     final String[] parts = fileName.split("-");
                     if (parts.length > 1) {
-                        status = parts[0];
+                        label = parts[0];
                     }
                 }
-                log.info("提取的状态: {}", status);
-             
-                MarkdownDocumentReaderConfig config = MarkdownDocumentReaderConfig.builder()
+                log.info("提取的文档标签: {}", label);
+   
+                Builder builder = MarkdownDocumentReaderConfig.builder()
                         .withHorizontalRuleCreateDocument(true)
                         .withIncludeCodeBlock(false)
-                        .withIncludeBlockquote(false)
-                        .withAdditionalMetadata("filename", fileName)
-                        .withAdditionalMetadata("status", status)
-                        .build();
-                MarkdownDocumentReader markdownDocumentReader = new MarkdownDocumentReader(resource, config);
+                        .withIncludeBlockquote(false);
+                if (StringUtil.isNotEmpty(fileName)) {
+                    builder.withAdditionalMetadata("name", fileName);
+                }
+                if (StringUtil.isNotEmpty(label)) {
+                    builder.withAdditionalMetadata("label", label);
+                }
+                MarkdownDocumentReaderConfig config = builder.build();
+                        MarkdownDocumentReader markdownDocumentReader = new MarkdownDocumentReader(resource, config);
                 List<Document> documents = markdownDocumentReader.get();
                 log.info("文件 {} 加载了 {} 个文档片段", fileName, documents.size());
                 allDocuments.addAll(documents);
