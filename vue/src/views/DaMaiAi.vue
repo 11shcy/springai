@@ -294,10 +294,7 @@ onMounted(() => {
 <style scoped lang="scss">
 .customer-service {
   position: fixed;
-  top: 64px;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 64px 0 0 0;
   display: flex;
   background: var(--bg-color);
   overflow: hidden;
@@ -322,6 +319,7 @@ onMounted(() => {
     backdrop-filter: blur(10px);
     border-radius: 1rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
     
     .history-header {
       flex-shrink: 0;
@@ -329,9 +327,11 @@ onMounted(() => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       
       h2 {
         font-size: 1.25rem;
+        font-weight: 600;
       }
       
       .new-chat {
@@ -344,15 +344,15 @@ onMounted(() => {
         color: white;
         border: none;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
         
         &:hover {
           background: #000;
+          transform: translateY(-1px);
         }
         
-        .icon {
-          width: 1.25rem;
-          height: 1.25rem;
+        &:active {
+          transform: translateY(0);
         }
       }
     }
@@ -360,7 +360,22 @@ onMounted(() => {
     .history-list {
       flex: 1;
       overflow-y: auto;
-      padding: 0 1rem 1rem;
+      padding: 0.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+      
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
       
       .history-item {
         display: flex;
@@ -369,10 +384,12 @@ onMounted(() => {
         padding: 0.75rem;
         border-radius: 0.5rem;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
+        margin-bottom: 0.25rem;
         
         &:hover {
           background: rgba(0, 0, 0, 0.05);
+          transform: translateX(2px);
           
           .delete-btn {
             opacity: 1;
@@ -381,11 +398,7 @@ onMounted(() => {
         
         &.active {
           background: rgba(0, 0, 0, 0.1);
-        }
-        
-        .icon {
-          width: 1.25rem;
-          height: 1.25rem;
+          font-weight: 500;
         }
         
         .title {
@@ -393,6 +406,7 @@ onMounted(() => {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          font-size: 0.95rem;
         }
 
         .delete-btn {
@@ -409,11 +423,6 @@ onMounted(() => {
             color: #ff4d4f;
             background: rgba(255, 77, 79, 0.1);
           }
-          
-          .icon {
-            width: 1.25rem;
-            height: 1.25rem;
-          }
         }
       }
     }
@@ -428,36 +437,25 @@ onMounted(() => {
     border-radius: 1rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     overflow: hidden;
+    transition: all 0.3s ease;
 
     .service-header {
       flex-shrink: 0;
       padding: 1rem 2rem;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       background: rgba(255, 255, 255, 0.98);
+      transition: all 0.3s ease;
 
       .service-info {
         display: flex;
         align-items: center;
         gap: 1rem;
 
-        .avatar {
-          width: 48px;
-          height: 48px;
-          color: #333;
-          padding: 0;
-          background: transparent;
-          border-radius: 12px;
-          transition: all 0.3s ease;
-          
-          &:hover {
-            transform: scale(1.05);
-          }
-        }
-
         .info {
           h3 {
             font-size: 1.25rem;
             margin-bottom: 0.25rem;
+            font-weight: 600;
           }
 
           p {
@@ -472,6 +470,21 @@ onMounted(() => {
       flex: 1;
       overflow-y: auto;
       padding: 2rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+      
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
     }
     
     .input-area {
@@ -482,6 +495,7 @@ onMounted(() => {
       display: flex;
       gap: 1rem;
       align-items: flex-end;
+      transition: all 0.3s ease;
       
       textarea {
         flex: 1;
@@ -495,6 +509,7 @@ onMounted(() => {
         font-size: 1rem;
         line-height: 1.5;
         max-height: 150px;
+        transition: all 0.3s ease;
         
         &:focus {
           outline: none;
@@ -522,16 +537,15 @@ onMounted(() => {
           transform: scale(1.05);
         }
         
+        &:active:not(:disabled) {
+          transform: scale(0.95);
+        }
+        
         &:disabled {
           background: #f5f5f5;
           border-color: #e0e0e0;
           cursor: not-allowed;
           opacity: 0.6;
-        }
-        
-        .icon {
-          width: 2.5rem;
-          height: 2.5rem;
         }
       }
     }
@@ -539,15 +553,14 @@ onMounted(() => {
 
   .create-order-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
 
     .modal-content {
       background: white;
@@ -556,11 +569,13 @@ onMounted(() => {
       max-width: 500px;
       width: 90%;
       text-align: center;
+      animation: slideUp 0.3s ease;
 
       h3 {
         font-size: 1.5rem;
         margin-bottom: 1rem;
         color: #333;
+        font-weight: 600;
       }
 
       .create-order-info {
@@ -568,6 +583,24 @@ onMounted(() => {
         text-align: left;
         line-height: 1.6;
         color: #666;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.2);
+          border-radius: 3px;
+        }
       }
 
       button {
@@ -577,10 +610,16 @@ onMounted(() => {
         border: none;
         border-radius: 0.5rem;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
+        font-weight: 500;
 
         &:hover {
           background: #000;
+          transform: translateY(-1px);
+        }
+        
+        &:active {
+          transform: translateY(0);
         }
       }
     }
@@ -591,6 +630,28 @@ onMounted(() => {
   .sidebar {
     background: rgba(40, 40, 40, 0.95);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    
+    .history-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .history-list {
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
+      
+      .history-item {
+        &:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+        
+        &.active {
+          background: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
   }
   
   .chat-main {
@@ -601,19 +662,16 @@ onMounted(() => {
       background: rgba(30, 30, 30, 0.98);
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
-      .service-info {
-        .avatar {
-          color: #fff;
-          background: #444;
-          
-          &:hover {
-            background: #555;
-          }
-        }
+      .info p {
+        color: #999;
+      }
+    }
 
-        .info p {
-          color: #999;
-        }
+    .messages {
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
       }
     }
 
@@ -643,6 +701,11 @@ onMounted(() => {
 
     .create-order-info {
       color: #ccc;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+      
+      &::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+      }
     }
 
     button {
@@ -655,6 +718,26 @@ onMounted(() => {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .customer-service {
     .chat-container {
@@ -662,11 +745,57 @@ onMounted(() => {
     }
     
     .sidebar {
-      display: none;
+      position: fixed;
+      left: -300px;
+      top: 64px;
+      bottom: 0;
+      z-index: 100;
+      
+      &.show {
+        transform: translateX(300px);
+      }
     }
     
     .chat-main {
       border-radius: 0;
+      
+      .service-header {
+        padding: 1rem;
+      }
+      
+      .messages {
+        padding: 1rem;
+      }
+      
+      .input-area {
+        padding: 1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .customer-service {
+    .chat-main {
+      .service-header {
+        .service-info {
+          .info {
+            h3 {
+              font-size: 1.1rem;
+            }
+            
+            p {
+              font-size: 0.8rem;
+            }
+          }
+        }
+      }
+      
+      .input-area {
+        textarea {
+          font-size: 0.95rem;
+        }
+      }
     }
   }
 }
