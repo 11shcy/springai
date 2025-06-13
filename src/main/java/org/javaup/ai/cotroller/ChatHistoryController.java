@@ -2,7 +2,7 @@ package org.javaup.ai.cotroller;
 
 import lombok.RequiredArgsConstructor;
 import org.javaup.ai.common.ApiResponse;
-import org.javaup.ai.service.impl.ChatHistoryServiceImpl;
+import org.javaup.ai.service.impl.ChatTypeHistoryServiceImpl;
 import org.javaup.ai.vo.ChatHistoryMessageVO;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("/history")
 public class ChatHistoryController {
 
-    private final ChatHistoryServiceImpl chatHistoryServiceImpl;
+    private final ChatTypeHistoryServiceImpl chatHistoryServiceImpl;
 
     private final ChatMemory chatMemory;
 

@@ -5,6 +5,7 @@ CREATE TABLE `d_chat_type_history` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `type` int NOT NULL COMMENT '会话类型，详见ChatType枚举',
   `chat_id` varchar(225) NOT NULL COMMENT '会话id',
+  `title` varchar(512) DEFAULT NULL COMMENT '标题',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `edit_time` datetime DEFAULT NULL COMMENT '编辑时间',
   `status` tinyint(1) DEFAULT '1' COMMENT '1:正常 0:删除',

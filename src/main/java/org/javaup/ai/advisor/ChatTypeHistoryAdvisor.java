@@ -1,7 +1,7 @@
 package org.javaup.ai.advisor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.javaup.ai.service.ChatHistoryService;
+import org.javaup.ai.service.ChatTypeHistoryService;
 import org.javaup.ai.utils.StringUtil;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
@@ -26,16 +26,16 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
     
     private final Integer order;
     
-    private final ChatHistoryService chatHistoryService;
+    private final ChatTypeHistoryService chatTypeHistoryService;
     
-    private ChatTypeHistoryAdvisor(Integer type, String defaultConversationId, ChatHistoryService chatHistoryService, Integer order) {
+    private ChatTypeHistoryAdvisor(Integer type, String defaultConversationId, ChatTypeHistoryService chatTypeHistoryService, Integer order) {
         if (Objects.isNull(type)) {
             throw new IllegalArgumentException("type cannot be null");
         }
         if (StringUtil.isEmpty(defaultConversationId)) {
             throw new IllegalArgumentException("defaultConversationId cannot be empty");
         }
-        if (Objects.isNull(chatHistoryService)) {
+        if (Objects.isNull(chatTypeHistoryService)) {
             throw new IllegalArgumentException("chatHistoryService cannot be null");
         }
         if (Objects.isNull(order)) {
@@ -43,7 +43,7 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
         }
         this.type = type;
         this.defaultConversationId = defaultConversationId;
-        this.chatHistoryService = chatHistoryService;
+        this.chatTypeHistoryService = chatTypeHistoryService;
         this.order = order;
     }
     
@@ -51,7 +51,7 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
     public ChatClientRequest before(final ChatClientRequest chatClientRequest, final AdvisorChain advisorChain) {
         log.info("存储会话记录到数据库中");
         String conversationId = getConversationId(chatClientRequest.context(), this.defaultConversationId);
-        chatHistoryService.save(type,conversationId);
+        chatTypeHistoryService.save(type,conversationId);
         return chatClientRequest;
     }
     
@@ -65,8 +65,8 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
         return order;
     }
     
-    public static Builder builder(ChatHistoryService chatHistoryService) {
-        return new Builder(chatHistoryService);
+    public static Builder builder(ChatTypeHistoryService chatTypeHistoryService) {
+        return new Builder(chatTypeHistoryService);
     }
     
     public static final class Builder {
@@ -75,10 +75,10 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
         
         private Integer order = Ordered.HIGHEST_PRECEDENCE + 99;
         
-        private ChatHistoryService chatHistoryService;
+        private ChatTypeHistoryService chatTypeHistoryService;
         
-        private Builder(ChatHistoryService chatHistoryService) {
-            this.chatHistoryService = chatHistoryService;
+        private Builder(ChatTypeHistoryService chatTypeHistoryService) {
+            this.chatTypeHistoryService = chatTypeHistoryService;
         }
         
         public ChatTypeHistoryAdvisor.Builder type(Integer type) {
@@ -86,8 +86,8 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
             return this;
         }
         
-        public ChatTypeHistoryAdvisor.Builder chatHistoryService(ChatHistoryService chatHistoryService) {
-            this.chatHistoryService = chatHistoryService;
+        public ChatTypeHistoryAdvisor.Builder chatHistoryService(ChatTypeHistoryService chatTypeHistoryService) {
+            this.chatTypeHistoryService = chatTypeHistoryService;
             return this;
         }
         
@@ -98,7 +98,7 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
         
         public ChatTypeHistoryAdvisor build() {
             final String conversationId = ChatMemory.DEFAULT_CONVERSATION_ID;
-            return new ChatTypeHistoryAdvisor(this.type,conversationId, this.chatHistoryService, this.order);
+            return new ChatTypeHistoryAdvisor(this.type,conversationId, this.chatTypeHistoryService, this.order);
         }
         
     }

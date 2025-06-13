@@ -256,12 +256,12 @@ const startNewChat = async () => {  // 添加 async
   // 添加新对话到历史列表
   const newChat = {
     id: newChatId,
-    title: `咨询 ${newChatId.slice(-6)}`
+    title: `对话 ${newChatId.slice(-6)}`
   }
   chatHistory.value = [newChat, ...chatHistory.value]
 
   // 发送初始问候语
-  await sendMessage('你好啊，麦小蜜')
+  //await sendMessage('你好啊，麦小蜜')
 }
 
 // 删除对话

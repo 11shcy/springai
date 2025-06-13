@@ -15,6 +15,8 @@ import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.annotation.Bean;
 
+import static org.javaup.ai.constants.DaMaiConstant.MESSAGE_CHAT_MEMORY_ADVISOR_ORDER;
+
 /**
  * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
  * @description: 自动装配类
@@ -49,9 +51,19 @@ public class DaMaiAiAutoConfiguration {
                 .defaultSystem(DaMaiConstant.DA_MAI_SYSTEM_PROMPT)
                 .defaultAdvisors(
                         new SimpleLoggerAdvisor(),
-                        MessageChatMemoryAdvisor.builder(chatMemory).build()
+                        MessageChatMemoryAdvisor.builder(chatMemory).order(MESSAGE_CHAT_MEMORY_ADVISOR_ORDER).build()
                 )
                 .defaultTools(aiProgram)
+                .build();
+    }
+    
+    @Bean
+    public ChatClient titleChatClient(DeepSeekChatModel model) {
+        return ChatClient
+                .builder(model)
+                .defaultAdvisors(
+                        new SimpleLoggerAdvisor()
+                )
                 .build();
     }
     

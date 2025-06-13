@@ -1,5 +1,7 @@
 package org.javaup.ai.constants;
 
+import org.springframework.core.Ordered;
+
 /**
  * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
  * @description: 常量类
@@ -62,4 +64,10 @@ public class DaMaiConstant {
     public static final String TICKET_USER_LIST_URL = "http://localhost:6085/damai/user/ticket/user/list";
     
     public static final String CREATE_ORDER_URL = "http://localhost:6085/damai/program/program/order/create/v1";
+    
+    public static final Integer CHAT_TYPE_HISTORY_ADVISOR_ORDER = Ordered.HIGHEST_PRECEDENCE + 999;
+    
+    public static final Integer MESSAGE_CHAT_MEMORY_ADVISOR_ORDER = 2;
+    
+    public static final Integer CHAT_TITLE_ADVISOR_ORDER = 1;
 }

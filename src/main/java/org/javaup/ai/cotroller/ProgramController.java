@@ -1,12 +1,13 @@
 package org.javaup.ai.cotroller;
 
 import org.javaup.ai.advisor.ChatTypeHistoryAdvisor;
+import org.javaup.ai.advisor.ChatTypeTitleAdvisor;
 import org.javaup.ai.ai.function.call.ProgramCall;
 import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
 import org.javaup.ai.ai.rag.QueryRewriter;
 import org.javaup.ai.dto.ProgramDetailDto;
 import org.javaup.ai.enums.ChatType;
-import org.javaup.ai.service.ChatHistoryService;
+import org.javaup.ai.service.ChatTypeHistoryService;
 import org.javaup.ai.vo.ProgramSearchVo;
 import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.slf4j.Logger;
@@ -23,6 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+
+import static org.javaup.ai.constants.DaMaiConstant.CHAT_TITLE_ADVISOR_ORDER;
+import static org.javaup.ai.constants.DaMaiConstant.CHAT_TYPE_HISTORY_ADVISOR_ORDER;
 
 /**
  * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
@@ -46,11 +50,18 @@ public class ProgramController {
     @Autowired
     private ChatClient markdownChatClient;
     
+    @Qualifier("titleChatClient")
     @Autowired
-    private ChatHistoryService chatHistoryService;
+    private ChatClient titleChatClient;
+    
+    @Autowired
+    private ChatTypeHistoryService chatTypeHistoryService;
     
     @Autowired
     private QueryRewriter queryRewriter;
+    
+    @Autowired
+    private ChatMemory chatMemory;
 
     @RequestMapping(value = "/chat", produces = "text/html;charset=utf-8")
     public Flux<String> chat(@RequestParam("prompt") String prompt,
@@ -60,8 +71,9 @@ public class ProgramController {
         // 2.请求模型
         return assistantChatClient.prompt()
                 .user(prompt)
-                .advisors(ChatTypeHistoryAdvisor.builder(chatHistoryService).type(ChatType.ASSISTANT.getCode()).build())
+                .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
+                .advisors(ChatTypeTitleAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode()).chatClient(titleChatClient).chatMemory(chatMemory).order(CHAT_TITLE_ADVISOR_ORDER).build())
                 .stream()
                 .content();
     }
@@ -74,11 +86,12 @@ public class ProgramController {
         // 2.请求模型
         return markdownChatClient.prompt()
                 .user(prompt)
-                .advisors(ChatTypeHistoryAdvisor.builder(chatHistoryService).type(ChatType.MARKDOWN.getCode()).build())
+                .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
                 .advisors(a -> {
                     log.info("设置会话ID: {}", chatId);
                     a.param(ChatMemory.CONVERSATION_ID, chatId);
                 })
+                .advisors(ChatTypeTitleAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).chatClient(titleChatClient).chatMemory(chatMemory).order(CHAT_TITLE_ADVISOR_ORDER).build())
                 .stream()
                 .content();
     }

@@ -23,4 +23,6 @@ public class ChatTypeHistory extends BaseTableData {
     private Integer type;
     
     private String chatId;
+    
+    private String title;
 }

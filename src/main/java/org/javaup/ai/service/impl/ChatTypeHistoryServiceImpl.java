@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.javaup.ai.entity.ChatTypeHistory;
 import org.javaup.ai.mapper.ChatHistoryMapper;
-import org.javaup.ai.service.ChatHistoryService;
+import org.javaup.ai.service.ChatTypeHistoryService;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.Objects;
  * @author: 阿星不是程序员
  **/
 @Service
-public class ChatHistoryServiceImpl implements ChatHistoryService {
+public class ChatTypeHistoryServiceImpl implements ChatTypeHistoryService {
     
     @Autowired
     private ChatHistoryMapper chatHistoryMapper;
@@ -75,5 +75,23 @@ public class ChatHistoryServiceImpl implements ChatHistoryService {
                 Wrappers.lambdaUpdate(ChatTypeHistory.class).eq(ChatTypeHistory::getType, type).eq(ChatTypeHistory::getChatId, chatId);
         chatHistoryMapper.delete(chatHistroyLambdaUpdateWrapper);
         chatMemory.clear(chatId);
+    }
+    
+    /**
+     * 获取会话
+     * @param type 业务类型
+     * @param chatId 会话ID
+     * @return 会话
+     */
+    @Override
+    public ChatTypeHistory getChatTypeHistory(Integer type, String chatId) {
+        LambdaQueryWrapper<ChatTypeHistory> chatHistroyLambdaQueryWrapper =
+                Wrappers.lambdaQuery(ChatTypeHistory.class).eq(ChatTypeHistory::getType, type).eq(ChatTypeHistory::getChatId, chatId);
+        return chatHistoryMapper.selectOne(chatHistroyLambdaQueryWrapper);
+    }
+    
+    @Override
+    public void updateById(ChatTypeHistory chatTypeHistory){
+        chatHistoryMapper.updateById(chatTypeHistory);
     }
 }

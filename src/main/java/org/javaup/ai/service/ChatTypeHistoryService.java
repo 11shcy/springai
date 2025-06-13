@@ -1,5 +1,7 @@
 package org.javaup.ai.service;
 
+import org.javaup.ai.entity.ChatTypeHistory;
+
 import java.util.List;
 
 /**
@@ -7,7 +9,7 @@ import java.util.List;
  * @description: 聊天记录服务
  * @author: 阿星不是程序员
  **/
-public interface ChatHistoryService {
+public interface ChatTypeHistoryService {
     
     /**
      * 保存会话记录
@@ -29,4 +31,18 @@ public interface ChatHistoryService {
      * @param chatId 会话ID
      */
     void delete(Integer type, String chatId);
+    
+    /**
+     * 获取会话
+     * @param type 业务类型
+     * @param chatId 会话ID
+     * @return 会话
+     */
+    ChatTypeHistory getChatTypeHistory(Integer type, String chatId);
+    
+    /**
+     * 更新会话类型历史
+     * @param chatTypeHistory 会话类型历史记录
+     */
+    void updateById(ChatTypeHistory chatTypeHistory);
 }
