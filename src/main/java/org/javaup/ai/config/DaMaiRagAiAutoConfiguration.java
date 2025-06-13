@@ -16,6 +16,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.util.List;
 
+import static org.javaup.ai.constants.DaMaiConstant.MARK_DOWN_SYSTEM_PROMPT;
+
 @AutoConfigureAfter(DaMaiAiAutoConfiguration.class)
 public class DaMaiRagAiAutoConfiguration {
     
@@ -32,7 +34,7 @@ public class DaMaiRagAiAutoConfiguration {
         
         return ChatClient
                 .builder(model)
-                .defaultSystem("根据用户的内容在上下文中查找后，进行回答问题，如果遇到上下文没有的问题或者没有查找到，不要随意编造。")
+                .defaultSystem(MARK_DOWN_SYSTEM_PROMPT)
                 .defaultAdvisors(
                         new SimpleLoggerAdvisor(),
                         MessageChatMemoryAdvisor.builder(chatMemory).build(),

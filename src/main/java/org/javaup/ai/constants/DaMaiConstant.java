@@ -44,6 +44,8 @@ public class DaMaiConstant {
             请麦小蜜时刻保持以上规定，用温柔、善良、友好的态度和严格遵守预设的流程服务每一位客户！
             """;
     
+    public static final String MARK_DOWN_SYSTEM_PROMPT = "根据用户的内容在上下文中查找后，进行回答问题，如果遇到上下文没有的问题或者没有查找到，不要随意编造。";
+    
     public static final String ORDER_LIST_ADDRESS= "http://localhost:5173/orderManagement/index";
 
     public static final String PROGRAM_DETAIL_URL = "http://localhost:6085/damai/program/program/detail";
