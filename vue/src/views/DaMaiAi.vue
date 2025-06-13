@@ -12,13 +12,13 @@
         <div class="history-list">
           <div 
             v-for="chat in chatHistory" 
-            :key="chat.id"
+            :key="`${chat.id}-${chat.title}`"
             class="history-item"
             :class="{ 'active': currentChatId === chat.id }"
             @click="loadChat(chat.id)"
           >
             <ChatBubbleIcon class="icon" :size="24" />
-            <span class="title">{{ chat.title || '新的聊天' }}</span>
+            <span class="title">{{ chat.title || '新的对话' }}</span>
             <button 
               class="delete-btn" 
               @click.stop="deleteChat(chat.id)"
@@ -81,12 +81,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
-import { useDark } from '@vueuse/core'
-import { marked } from 'marked'
+import {nextTick, onMounted, ref, triggerRef, watch} from 'vue'
+import {useDark} from '@vueuse/core'
+import {marked} from 'marked'
 import DOMPurify from 'dompurify'
 import Chat from '../components/Chat.vue'
-import { chatAPI } from '../api/api'
+import {chatAPI} from '../api/api'
 import LaptopIcon from '../components/icons/LaptopIcon.vue'
 import ChatBubbleIcon from '../components/icons/ChatBubbleIcon.vue'
 import PlusIcon from '../components/icons/PlusIcon.vue'
@@ -103,6 +103,7 @@ const currentMessages = ref([])
 const chatHistory = ref([])
 const createOrderModal = ref(false)
 const bookingInfo = ref('')
+const titleUpdateTimer = ref(null)
 
 // 配置 marked
 marked.setOptions({
@@ -191,6 +192,8 @@ const sendMessage = async (content) => {
       }
     }
 
+    checkAndUpdateChatTitles()
+
     // 检查是否包含订单编号信息
     if (totalContent.includes('订单编号')) {
       const createOrderMatch = totalContent.match(/【(.*?)】/s)
@@ -219,7 +222,7 @@ const sendMessage = async (content) => {
 const loadChat = async (chatId) => {
   currentChatId.value = chatId
   try {
-    const messages = await chatAPI.historyChatHistoryList(chatId, 2)
+    const messages = await chatAPI.chatHistoryMessageList(chatId, 2)
     currentMessages.value = messages.map(msg => ({
       ...msg,
       isMarkdown: msg.role === 'assistant'  // 为助手消息添加 Markdown 标记
@@ -233,7 +236,7 @@ const loadChat = async (chatId) => {
 // 加载聊天历史
 const loadChatHistory = async () => {
   try {
-    const history = await chatAPI.historyChatIdList(2)
+    const history = await chatAPI.chatTypeHistoryList(2)
     chatHistory.value = history || []
     if (history && history.length > 0) {
       await loadChat(history[0].id)
@@ -256,10 +259,9 @@ const startNewChat = async () => {  // 添加 async
   // 添加新对话到历史列表
   const newChat = {
     id: newChatId,
-    title: `对话 ${newChatId.slice(-6)}`
+    title: '新的对话'
   }
   chatHistory.value = [newChat, ...chatHistory.value]
-
   // 发送初始问候语
   //await sendMessage('你好啊，麦小蜜')
 }
@@ -285,10 +287,99 @@ const deleteChat = async (chatId) => {
   }
 }
 
+// 检查并更新聊天标题
+const checkAndUpdateChatTitles = async () => {
+  try {
+    // 检查是否有标题为"新的对话"的聊天记录
+    const hasNewChatTitle = chatHistory.value.some(chat => 
+      chat.title === '新的对话' || chat.title === '新的聊天'
+    )
+    
+    if (!hasNewChatTitle) {
+      console.log('没有需要更新的新对话标题')
+      return
+    }
+    
+    // 调用接口获取聊天记录列表
+    const chatListData = await chatAPI.chatTypeHistoryList(2)
+    console.log('获取到的聊天列表数据:', chatListData)
+    
+    // 检查响应是否有内容
+    if (!chatListData || (Array.isArray(chatListData) && chatListData.length === 0)) {
+      console.log('聊天列表数据为空')
+      return
+    }
+    
+    // 更新聊天记录标题
+    if (Array.isArray(chatListData)) {
+      console.log('更新前的chatHistory:', JSON.parse(JSON.stringify(chatHistory.value)))
+      
+      // 创建新的数组来触发响应式更新
+      const updatedChatHistory = chatHistory.value.map(chat => {
+        const matchedChat = chatListData.find(apiChat => {
+          // 添加更多的匹配方式
+          return apiChat.chatId === chat.id || apiChat.id === chat.id
+        })
+        
+        if (matchedChat && matchedChat.title && matchedChat.title.trim()) {
+          console.log(`更新聊天 ${chat.id} 的标题: "${chat.title}" -> "${matchedChat.title}"`)
+          return {
+            ...chat,
+            title: matchedChat.title
+          }
+        }
+        return chat
+      })
+      
+      chatHistory.value = [...updatedChatHistory]
+
+    }
+  } catch (error) {
+    console.error('检查并更新聊天标题失败:', error)
+  }
+}
+
+// 测试方法：手动更新标题（用于调试）
+const testUpdateTitle = () => {
+  if (chatHistory.value.length > 0) {
+    console.log('测试更新第一个聊天的标题')
+    const newTitle = `测试标题 ${Date.now()}`
+    chatHistory.value = chatHistory.value.map((chat, index) => {
+      if (index === 0) {
+        return { ...chat, title: newTitle }
+      }
+      return chat
+    })
+    triggerRef(chatHistory)
+    nextTick(() => {
+      console.log('测试更新完成，新标题:', newTitle)
+    })
+  }
+}
+
+// 将测试方法暴露到window对象，方便在控制台调用
+if (typeof window !== 'undefined') {
+  window.testUpdateTitle = testUpdateTitle
+}
+
+// 监听chatHistory变化
+watch(
+  () => chatHistory.value,
+  (newVal, oldVal) => {
+    console.log('chatHistory发生变化:', {
+      oldVal: JSON.parse(JSON.stringify(oldVal || [])),
+      newVal: JSON.parse(JSON.stringify(newVal || []))
+    })
+  },
+  { deep: true }
+)
+
 onMounted(() => {
   loadChatHistory()
   adjustTextareaHeight()
+  checkAndUpdateChatTitles()
 })
+
 </script>
 
 <style scoped lang="scss">
