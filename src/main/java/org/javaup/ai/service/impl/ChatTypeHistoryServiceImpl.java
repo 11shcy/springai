@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.javaup.ai.entity.ChatTypeHistory;
 import org.javaup.ai.mapper.ChatHistoryMapper;
 import org.javaup.ai.service.ChatTypeHistoryService;
+import org.javaup.ai.vo.ChatTypeHistoryVo;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -93,5 +95,24 @@ public class ChatTypeHistoryServiceImpl implements ChatTypeHistoryService {
     @Override
     public void updateById(ChatTypeHistory chatTypeHistory){
         chatHistoryMapper.updateById(chatTypeHistory);
+    }
+    
+    /**
+     * 获取会话ID列表
+     * @param type 业务类型
+     * @return 会话ID列表
+     */
+    @Override
+    public List<ChatTypeHistoryVo> getChatTypeHistoryList(Integer type){
+        LambdaQueryWrapper<ChatTypeHistory> chatHistroyLambdaQueryWrapper =
+                Wrappers.lambdaQuery(ChatTypeHistory.class).eq(ChatTypeHistory::getType, type);
+        List<ChatTypeHistory> chatTypeHistoryList = chatHistoryMapper.selectList(chatHistroyLambdaQueryWrapper);
+        return chatTypeHistoryList.stream()
+                .map(chatTypeHistory -> {
+                    ChatTypeHistoryVo chatTypeHistoryVo = new ChatTypeHistoryVo();
+                    BeanUtils.copyProperties(chatTypeHistory, chatTypeHistoryVo);
+                    return chatTypeHistoryVo;
+                })
+                .toList();
     }
 }

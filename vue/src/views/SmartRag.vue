@@ -190,22 +190,6 @@ const submitMessage = async (content) => {
         break
       }
     }
-
-    // 检查是否包含订单编号信息
-    if (totalContent.includes('订单编号')) {
-      const createOrderMatch = totalContent.match(/【(.*?)】/s)
-      if (createOrderMatch) {
-        // 使用 marked 处理预约信息中的 Markdown
-        orderDetails.value = DOMPurify.sanitize(
-          marked.parse(createOrderMatch[1]),
-          {
-            ADD_TAGS: ['code', 'pre', 'span'],
-            ADD_ATTR: ['class', 'language']
-          }
-        )
-        showOrderConfirmation.value = true
-      }
-    }
   } catch (error) {
     console.error('发送消息失败:', error)
     assistantMessage.content = '抱歉，发生了错误，请稍后重试。'
@@ -219,7 +203,7 @@ const submitMessage = async (content) => {
 const switchConversation = async (chatId) => {
   activeConversationId.value = chatId
   try {
-    const messages = await chatAPI.historyChatHistoryList(chatId, 3)
+    const messages = await chatAPI.chatHistoryMessageList(chatId, 3)
     activeMessages.value = messages.map(msg => ({
       ...msg,
       isMarkdown: msg.role === 'assistant'  // 为助手消息添加 Markdown 标记
@@ -233,7 +217,7 @@ const switchConversation = async (chatId) => {
 // 加载聊天历史
 const loadConversationHistory = async () => {
   try {
-    const history = await chatAPI.historyChatIdList(3)
+    const history = await chatAPI.chatTypeHistoryList(3)
     conversationHistory.value = history || []
     if (history && history.length > 0) {
       await switchConversation(history[0].id)
@@ -256,12 +240,12 @@ const initiateNewConversation = async () => {  // 添加 async
   // 添加新对话到历史列表
   const newChat = {
     id: newChatId,
-    title: `咨询 ${newChatId.slice(-6)}`
+    title: `新的咨询`
   }
   conversationHistory.value = [newChat, ...conversationHistory.value]
 
   // 发送初始问候语
-  await submitMessage('你好啊，智能助手')
+  //await submitMessage('你好啊，智能助手')
 }
 
 // 删除对话

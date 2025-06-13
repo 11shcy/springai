@@ -1,6 +1,7 @@
 package org.javaup.ai.service;
 
 import org.javaup.ai.entity.ChatTypeHistory;
+import org.javaup.ai.vo.ChatTypeHistoryVo;
 
 import java.util.List;
 
@@ -45,4 +46,11 @@ public interface ChatTypeHistoryService {
      * @param chatTypeHistory 会话类型历史记录
      */
     void updateById(ChatTypeHistory chatTypeHistory);
+    
+    /**
+     * 获取会话列表
+     * @param type 业务类型
+     * @return 会话列表
+     */
+    List<ChatTypeHistoryVo> getChatTypeHistoryList(Integer type);
 }

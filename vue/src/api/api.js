@@ -59,17 +59,15 @@ export const chatAPI = {
   },
 
   // 获取聊天的历史会话id列表
-  async historyChatIdList(type = 1) {
+  async chatTypeHistoryList(type = 1) {
     try {
-      const url = buildUrl('/history/chatId/list', { type })
+      const url = buildUrl('/chat/type/history/list', { type })
       const response = await fetchWithTimeout(url)
-      const chatIds = await response.json()
+      const chats = await response.json()
       
-      return chatIds.map(id => ({
-        id,
-        title: type === 4 ? `PDF对话 ${id.slice(-6)}` : 
-               type === 2 ? `咨询 ${id.slice(-6)}` :
-               `对话 ${id.slice(-6)}`
+      return chats.map(chat => ({
+        id:chat.chatId,
+        title: chat.title === '' || chat.title === null  || chat.title === undefined ? `新的对话` : chat.title
       }))
     } catch (error) {
       console.error('History Chat ID List Error:', error)
@@ -78,9 +76,9 @@ export const chatAPI = {
   },
 
   // 获取具体对话下的历史消息
-  async historyChatHistoryList(chatId, type = 1) {
+  async chatHistoryMessageList(chatId, type = 1) {
     try {
-      const url = buildUrl('/history/chatHistory/list', { chatId, type })
+      const url = buildUrl('/chat/history/message/list', { chatId, type })
       const response = await fetchWithTimeout(url)
       const messages = await response.json()
       
@@ -121,7 +119,7 @@ export const chatAPI = {
   // 删除对话
   async deleteChat(chatId, type = 1) {
     try {
-      const url = buildUrl('/history/delete', { chatId, type })
+      const url = buildUrl('/chat/delete', { chatId, type })
       await fetchWithTimeout(url)
       return true
     } catch (error) {
