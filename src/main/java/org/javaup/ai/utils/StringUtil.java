@@ -1,7 +1,6 @@
 package org.javaup.ai.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,12 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @program: 极度真实还原大麦网高并发实战项目。 添加 阿星不是程序员 微信，添加时备注 大麦 来获取项目的完整资料 
- * @description: String工具
+ * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
+ * @description: 字符串工具类
  * @author: 阿星不是程序员
  **/
+@Slf4j
 public class StringUtil {
-	private final static Logger logger = LoggerFactory.getLogger(StringUtil.class);
 
 	/**
 	 * 判断字符串不为空
@@ -61,7 +60,7 @@ public class StringUtil {
 				try {
 					baos.close();
 				} catch (IOException e) {
-					logger.error("关闭流失败！");
+					log.error("关闭流失败！");
 				}
 			}
 		}

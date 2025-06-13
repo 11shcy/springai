@@ -1,5 +1,10 @@
 package org.javaup.ai.constants;
 
+/**
+ * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
+ * @description: 常量类
+ * @author: 阿星不是程序员
+ **/
 public class DaMaiConstant {
 
     public static final String DA_MAI_SYSTEM_PROMPT = """

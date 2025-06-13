@@ -9,6 +9,11 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
+ * @description: 票务用户列表结果返回体
+ * @author: 阿星不是程序员
+ **/
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class TicketUserResultVo extends ApiResponse implements Serializable {

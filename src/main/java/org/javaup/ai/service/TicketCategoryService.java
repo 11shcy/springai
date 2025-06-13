@@ -14,6 +14,11 @@ import java.util.Objects;
 
 import static org.javaup.ai.constants.DaMaiConstant.TICKET_LIST_URL;
 
+/**
+ * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
+ * @description: 票档服务类
+ * @author: 阿星不是程序员
+ **/
 @Service
 public class TicketCategoryService {
 

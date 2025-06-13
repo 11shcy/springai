@@ -7,6 +7,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
+ * @description: 创建订单 dto
+ * @author: 阿星不是程序员
+ **/
 @Data
 public class CreateOrderFunctionDto {
     

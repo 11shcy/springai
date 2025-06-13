@@ -1,11 +1,10 @@
 package org.javaup.ai.enums;
 
 /**
- * @program: 极度真实还原大麦网高并发实战项目。 添加 阿星不是程序员 微信，添加时备注 大麦 来获取项目的完整资料 
- * @description: 通用状态枚举
+ * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
+ * @description: 业务类型枚举类
  * @author: 阿星不是程序员
  **/
-
 public enum ChatType {
     /**
      * 通用状态枚举

@@ -8,6 +8,11 @@ import org.springframework.ai.chat.messages.MessageType;
 import static org.springframework.ai.chat.messages.MessageType.ASSISTANT;
 import static org.springframework.ai.chat.messages.MessageType.USER;
 
+/**
+ * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
+ * @description: 聊天记录消息体
+ * @author: 阿星不是程序员
+ **/
 @NoArgsConstructor
 @Data
 public class ChatHistoryMessageVO {
