@@ -1,11 +1,11 @@
-package org.javaup.ai.service;
+package org.javaup.ai.ai.function.call;
 
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
 import org.javaup.ai.dto.ProgramOrderCreateDto;
 import org.javaup.ai.enums.BaseCode;
 import org.javaup.ai.vo.result.CreateOrderResult;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
@@ -16,8 +16,8 @@ import static org.javaup.ai.constants.DaMaiConstant.CREATE_ORDER_URL;
  * @description: 订单服务类
  * @author: 阿星不是程序员
  **/
-@Service
-public class OrderService {
+@Component
+public class OrderCall {
     
     public String createOrder(ProgramOrderCreateDto programOrderCreateDto){
         CreateOrderResult createOrderResult = new CreateOrderResult();

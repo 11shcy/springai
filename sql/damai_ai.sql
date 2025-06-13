@@ -1,7 +1,7 @@
 -- 建数据库
 create database if not exists damai_ai character set utf8mb4;
 -- 创建表
-CREATE TABLE `d_chat_history` (
+CREATE TABLE `d_chat_type_history` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键id',
   `type` int NOT NULL COMMENT '会话类型，详见ChatType枚举',
   `chat_id` varchar(225) NOT NULL COMMENT '会话id',

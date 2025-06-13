@@ -1,20 +1,20 @@
-package org.javaup.ai.service;
+package org.javaup.ai.ai.function.call;
 
 
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
 import org.dromara.easyes.core.conditions.select.LambdaEsQueryWrapper;
 import org.dromara.easyes.core.kernel.EsWrappers;
-import org.javaup.ai.dto.ProgramDetailDto;
 import org.javaup.ai.ai.function.dto.ProgramRecommendFunctionDto;
 import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
+import org.javaup.ai.dto.ProgramDetailDto;
 import org.javaup.ai.enums.BaseCode;
 import org.javaup.ai.es.mapper.ProgramMapper;
 import org.javaup.ai.utils.StringUtil;
-import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.javaup.ai.vo.ProgramSearchVo;
+import org.javaup.ai.vo.result.ProgramDetailResultVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,8 +26,8 @@ import static org.javaup.ai.constants.DaMaiConstant.PROGRAM_DETAIL_URL;
  * @description: 节目服务类
  * @author: 阿星不是程序员
  **/
-@Service
-public class ProgramService {
+@Component
+public class ProgramCall {
 
     @Autowired
     private ProgramMapper programMapper;

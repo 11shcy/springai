@@ -14,8 +14,8 @@ import org.javaup.ai.entity.base.BaseTableData;
  **/
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName("d_chat_history")
-public class ChatHistroy extends BaseTableData {
+@TableName("d_chat_type_history")
+public class ChatTypeHistory extends BaseTableData {
     
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;

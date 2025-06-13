@@ -1,4 +1,4 @@
-package org.javaup.ai.service;
+package org.javaup.ai.ai.function.call;
 
 import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
@@ -7,7 +7,8 @@ import org.javaup.ai.vo.TicketUserVo;
 import org.javaup.ai.vo.UserDetailVo;
 import org.javaup.ai.vo.result.TicketUserResultVo;
 import org.javaup.ai.vo.result.UserDetailResultVo;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +22,8 @@ import static org.javaup.ai.constants.DaMaiConstant.USER_DETAIL_URL;
  * @description: 用户服务类
  * @author: 阿星不是程序员
  **/
-@Service
-public class UserService {
+@Component
+public class UserCall {
     
     public UserDetailVo userDetail(String mobile){
         Map<String,String> params = new HashMap<>(2);

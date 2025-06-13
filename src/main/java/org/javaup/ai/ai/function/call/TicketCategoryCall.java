@@ -1,4 +1,4 @@
-package org.javaup.ai.service;
+package org.javaup.ai.ai.function.call;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.http.HttpRequest;
@@ -7,7 +7,7 @@ import org.javaup.ai.dto.TicketCategoryListByProgramDto;
 import org.javaup.ai.enums.BaseCode;
 import org.javaup.ai.vo.TicketCategoryDetailVo;
 import org.javaup.ai.vo.result.TicketCategoryListResultVo;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,8 +19,8 @@ import static org.javaup.ai.constants.DaMaiConstant.TICKET_LIST_URL;
  * @description: 票档服务类
  * @author: 阿星不是程序员
  **/
-@Service
-public class TicketCategoryService {
+@Component
+public class TicketCategoryCall {
 
     public List<TicketCategoryDetailVo> selectListByProgram(TicketCategoryListByProgramDto ticketCategoryListByProgramDto) {
         String result = HttpRequest.post(TICKET_LIST_URL)
