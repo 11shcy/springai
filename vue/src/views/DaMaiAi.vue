@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import {nextTick, onMounted, ref, triggerRef, watch} from 'vue'
+import {nextTick, onMounted, ref, triggerRef} from 'vue'
 import {useDark} from '@vueuse/core'
 import {marked} from 'marked'
 import DOMPurify from 'dompurify'
@@ -296,83 +296,49 @@ const checkAndUpdateChatTitles = async () => {
     )
     
     if (!hasNewChatTitle) {
-      console.log('没有需要更新的新对话标题')
       return
     }
     
     // 调用接口获取聊天记录列表
     const chatListData = await chatAPI.chatTypeHistoryList(2)
-    console.log('获取到的聊天列表数据:', chatListData)
     
     // 检查响应是否有内容
     if (!chatListData || (Array.isArray(chatListData) && chatListData.length === 0)) {
-      console.log('聊天列表数据为空')
       return
     }
     
     // 更新聊天记录标题
     if (Array.isArray(chatListData)) {
-      console.log('更新前的chatHistory:', JSON.parse(JSON.stringify(chatHistory.value)))
+      // 使用 forEach 修改数组元素，然后强制触发更新
+      let hasUpdated = false
       
-      // 创建新的数组来触发响应式更新
-      const updatedChatHistory = chatHistory.value.map(chat => {
-        const matchedChat = chatListData.find(apiChat => {
-          // 添加更多的匹配方式
-          return apiChat.chatId === chat.id || apiChat.id === chat.id
-        })
+      for (let i = 0; i < chatHistory.value.length; i++) {
+        const chat = chatHistory.value[i]
+        const matchedChat = chatListData.find(apiChat => apiChat.id === chat.id)
         
         if (matchedChat && matchedChat.title && matchedChat.title.trim()) {
-          console.log(`更新聊天 ${chat.id} 的标题: "${chat.title}" -> "${matchedChat.title}"`)
-          return {
-            ...chat,
-            title: matchedChat.title
+          // 直接修改对象属性并创建新引用
+          chatHistory.value[i] = { 
+            ...chat, 
+            title: matchedChat.title 
           }
+          hasUpdated = true
         }
-        return chat
-      })
+      }
       
-      chatHistory.value = [...updatedChatHistory]
-
+      // 如果有更新，强制触发响应式更新
+      if (hasUpdated) {
+        // 触发数组的响应式更新
+        triggerRef(chatHistory)
+        await nextTick()
+      }
     }
   } catch (error) {
     console.error('检查并更新聊天标题失败:', error)
   }
 }
 
-// 测试方法：手动更新标题（用于调试）
-const testUpdateTitle = () => {
-  if (chatHistory.value.length > 0) {
-    console.log('测试更新第一个聊天的标题')
-    const newTitle = `测试标题 ${Date.now()}`
-    chatHistory.value = chatHistory.value.map((chat, index) => {
-      if (index === 0) {
-        return { ...chat, title: newTitle }
-      }
-      return chat
-    })
-    triggerRef(chatHistory)
-    nextTick(() => {
-      console.log('测试更新完成，新标题:', newTitle)
-    })
-  }
-}
 
-// 将测试方法暴露到window对象，方便在控制台调用
-if (typeof window !== 'undefined') {
-  window.testUpdateTitle = testUpdateTitle
-}
-
-// 监听chatHistory变化
-watch(
-  () => chatHistory.value,
-  (newVal, oldVal) => {
-    console.log('chatHistory发生变化:', {
-      oldVal: JSON.parse(JSON.stringify(oldVal || [])),
-      newVal: JSON.parse(JSON.stringify(newVal || []))
-    })
-  },
-  { deep: true }
-)
 
 onMounted(() => {
   loadChatHistory()
