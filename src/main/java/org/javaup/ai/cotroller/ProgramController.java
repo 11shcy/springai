@@ -66,9 +66,9 @@ public class ProgramController {
     @RequestMapping(value = "/chat", produces = "text/html;charset=utf-8")
     public Flux<String> chat(@RequestParam("prompt") String prompt,
                                 @RequestParam("chatId") String chatId) {
-        // 1.保存会话id，转为自定义advisors形式执行
+        // 保存会话id，转为自定义advisors形式执行
         //chatHistoryService.save(ChatType.ASSISTANT.getCode(), chatId);
-        // 2.请求模型
+        // 请求模型
         return assistantChatClient.prompt()
                 .user(prompt)
                 .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
@@ -81,9 +81,9 @@ public class ProgramController {
     @RequestMapping(value = "/rag", produces = "text/html;charset=utf-8")
     public Flux<String> rag(@RequestParam("prompt") String prompt,
                              @RequestParam("chatId") String chatId) {
-        /// 1.保存会话id
+        // 保存会话id
         //chatHistoryService.save(ChatType.MARKDOWN.getCode(), chatId);
-        // 2.请求模型
+        // 请求模型
         return markdownChatClient.prompt()
                 .user(prompt)
                 .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())

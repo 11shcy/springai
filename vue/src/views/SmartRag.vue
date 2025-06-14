@@ -81,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick ,triggerRef} from 'vue'
 import { useDark } from '@vueuse/core'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -190,6 +190,9 @@ const submitMessage = async (content) => {
         break
       }
     }
+
+    checkAndUpdateChatTitles()
+    
   } catch (error) {
     console.error('发送消息失败:', error)
     assistantMessage.content = '抱歉，发生了错误，请稍后重试。'
@@ -269,9 +272,61 @@ const removeConversation = async (chatId) => {
   }
 }
 
+// 检查并更新聊天标题
+const checkAndUpdateChatTitles = async () => {
+  try {
+    // 检查是否有标题为"新的对话"的聊天记录
+    const hasNewChatTitle = conversationHistory.value.some(chat =>
+        chat.title === '新的咨询'
+    )
+
+    if (!hasNewChatTitle) {
+      return
+    }
+
+    // 调用接口获取聊天记录列表
+    const chatListData = await chatAPI.chatTypeHistoryList(3)
+
+    // 检查响应是否有内容
+    if (!chatListData || (Array.isArray(chatListData) && chatListData.length === 0)) {
+      return
+    }
+
+    // 更新聊天记录标题
+    if (Array.isArray(chatListData)) {
+      // 使用 forEach 修改数组元素，然后强制触发更新
+      let hasUpdated = false
+
+      for (let i = 0; i < conversationHistory.value.length; i++) {
+        const chat = conversationHistory.value[i]
+        const matchedChat = chatListData.find(apiChat => apiChat.id === chat.id)
+
+        if (matchedChat && matchedChat.title && matchedChat.title.trim()) {
+          // 直接修改对象属性并创建新引用
+          conversationHistory.value[i] = {
+            ...chat,
+            title: matchedChat.title
+          }
+          hasUpdated = true
+        }
+      }
+
+      // 如果有更新，强制触发响应式更新
+      if (hasUpdated) {
+        // 触发数组的响应式更新
+        triggerRef(conversationHistory)
+        await nextTick()
+      }
+    }
+  } catch (error) {
+    console.error('检查并更新聊天标题失败:', error)
+  }
+}
+
 onMounted(() => {
   loadConversationHistory()
   adjustTextareaHeight()
+  checkAndUpdateChatTitles()
 })
 </script>
 
