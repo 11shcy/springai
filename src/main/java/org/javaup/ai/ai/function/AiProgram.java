@@ -63,49 +63,51 @@ public class AiProgram {
     public List<ProgramSearchVo> selectProgramList(@ToolParam(description = "查询的条件", required = true) ProgramSearchFunctionDto programSearchFunctionDto){
         return programCall.search(programSearchFunctionDto);
     }
+    
+    @Tool(description = "根据条件查询节目和演唱会的详情")
+    public ProgramDetailVo detail(@ToolParam(description = "查询的条件", required = true) ProgramSearchFunctionDto programSearchFunctionDto){
+        return selectTicketCategory(programSearchFunctionDto);
+    }
 
-    @Tool(description = "根据条件查询节目的票档信息")
-    public List<ProgramDetailVo> selectTicketCategory(@ToolParam(description = "查询的条件", required = true) ProgramSearchFunctionDto programSearchFunctionDto){
-        List<ProgramDetailVo> programDetailVoList = new ArrayList<>();
+    @Tool(description = "根据条件查询节目和演唱会的票档信息")
+    public ProgramDetailVo selectTicketCategory(@ToolParam(description = "查询的条件", required = true) ProgramSearchFunctionDto programSearchFunctionDto){
         List<ProgramSearchVo> programSearchVoList = programCall.search(programSearchFunctionDto);
         if (CollectionUtil.isEmpty(programSearchVoList)) {
-            return programDetailVoList;
+            return null;
         }
-        for (ProgramSearchVo programSearchVo : programSearchVoList) {
-            ProgramDetailDto programDetailDto = new ProgramDetailDto();
-            programDetailDto.setId(programSearchVo.getId());
-            ProgramDetailResultVo programDetailResultVo = programCall.detail(programDetailDto);
-            if (Objects.nonNull(programDetailResultVo.getData())) {
-                ProgramDetailVo programDetailVo = programDetailResultVo.getData();
-                TicketCategoryListByProgramDto ticketCategoryListByProgramDto = new TicketCategoryListByProgramDto();
-                ticketCategoryListByProgramDto.setProgramId(programDetailVo.getId());
-                List<TicketCategoryDetailVo> ticketCategoryDetailVoList = ticketCategoryCall.selectListByProgram(ticketCategoryListByProgramDto);
-                Map<Long, TicketCategoryDetailVo> ticketCategoryDetailMap = ticketCategoryDetailVoList.stream()
-                        .collect(Collectors.toMap(TicketCategoryDetailVo::getId,
-                                ticketCategoryDetailVo -> ticketCategoryDetailVo,
-                                (v1, v2) -> v2));
-                for (TicketCategoryVo ticketCategoryVo : programDetailVo.getTicketCategoryVoList()) {
-                    TicketCategoryDetailVo ticketCategoryDetailVo = ticketCategoryDetailMap.get(ticketCategoryVo.getId());
-                    if (Objects.nonNull(ticketCategoryDetailVo)) {
-                        ticketCategoryVo.setRemainNumber(ticketCategoryDetailVo.getRemainNumber());
-                        ticketCategoryVo.setTotalNumber(ticketCategoryDetailVo.getTotalNumber());
-                    }
-                }
-                programDetailVoList.add(programDetailResultVo.getData());
+        ProgramSearchVo programSearchVo = programSearchVoList.get(0);
+        ProgramDetailDto programDetailDto = new ProgramDetailDto();
+        programDetailDto.setId(programSearchVo.getId());
+        ProgramDetailResultVo programDetailResultVo = programCall.detail(programDetailDto);
+        if (Objects.isNull(programDetailResultVo.getData())) {
+            return null;
+        }
+        ProgramDetailVo programDetailVo = programDetailResultVo.getData();
+        TicketCategoryListByProgramDto ticketCategoryListByProgramDto = new TicketCategoryListByProgramDto();
+        ticketCategoryListByProgramDto.setProgramId(programDetailVo.getId());
+        List<TicketCategoryDetailVo> ticketCategoryDetailVoList = ticketCategoryCall.selectListByProgram(ticketCategoryListByProgramDto);
+        Map<Long, TicketCategoryDetailVo> ticketCategoryDetailMap = ticketCategoryDetailVoList.stream()
+                .collect(Collectors.toMap(TicketCategoryDetailVo::getId,
+                        ticketCategoryDetailVo -> ticketCategoryDetailVo,
+                        (v1, v2) -> v2));
+        for (TicketCategoryVo ticketCategoryVo : programDetailVo.getTicketCategoryVoList()) {
+            TicketCategoryDetailVo ticketCategoryDetailVo = ticketCategoryDetailMap.get(ticketCategoryVo.getId());
+            if (Objects.nonNull(ticketCategoryDetailVo)) {
+                ticketCategoryVo.setRemainNumber(ticketCategoryDetailVo.getRemainNumber());
+                ticketCategoryVo.setTotalNumber(ticketCategoryDetailVo.getTotalNumber());
             }
         }
-        return programDetailVoList;
+        return programDetailVo;
     }
     
     @Tool(description = "生成用户购买节目的订单，返回订单号")
     public CreateOrderVo createOrder(@ToolParam(description = "查询的条件", required = true) CreateOrderFunctionDto createOrderFunctionDto){
         ProgramSearchFunctionDto programSearchFunctionDto = new ProgramSearchFunctionDto();
         BeanUtils.copyProperties(createOrderFunctionDto, programSearchFunctionDto);
-        List<ProgramDetailVo> searchVoList = selectTicketCategory(programSearchFunctionDto);
-        if (CollectionUtil.isEmpty(searchVoList)) {
+        ProgramDetailVo programDetailVo = selectTicketCategory(programSearchFunctionDto);
+        if (Objects.isNull(programDetailVo)) {
             throw new RuntimeException("没有查询到节目，请检查查询条件是否正确");
         }
-        ProgramDetailVo programDetailVo = searchVoList.get(0);
         UserDetailVo userDetailVo = userCall.userDetail(createOrderFunctionDto.getMobile());
         if (Objects.isNull(userDetailVo)) {
             throw new RuntimeException("用户信息不存在");
