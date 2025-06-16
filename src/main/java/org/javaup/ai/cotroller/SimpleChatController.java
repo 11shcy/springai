@@ -1,9 +1,8 @@
 package org.javaup.ai.cotroller;
 
 
+import jakarta.annotation.Resource;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,8 +18,7 @@ import reactor.core.publisher.Flux;
 @RequestMapping("/simple")
 public class SimpleChatController {
 
-    @Qualifier("chatClient")
-    @Autowired
+    @Resource
     private ChatClient chatClient;
 
 
