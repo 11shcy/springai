@@ -1,7 +1,6 @@
 package org.javaup.ai.test;
 
 import cn.hutool.core.collection.CollectionUtil;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -23,7 +22,7 @@ public class RagAiTest {
     @Autowired
     private VectorStore vectorStore;
     
-    @PostConstruct
+    //@PostConstruct
     public void testVectorStore(){
         //搜索条件
         SearchRequest request = SearchRequest.builder()

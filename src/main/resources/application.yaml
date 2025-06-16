@@ -52,10 +52,6 @@ spring:
       chat:
         options:
           model: deepseek-chat
-logging:
-  level:
-    org.springframework.ai: debug
-    org.javaup.ai: debug
 easy-es:
   #默认为true,若为false则认为不启用本框架
   enable: true
