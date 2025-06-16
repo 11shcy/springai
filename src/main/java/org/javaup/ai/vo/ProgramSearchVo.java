@@ -18,7 +18,7 @@ import java.util.Date;
  **/
 @Data
 @Schema(title="ProgramVo", description ="节目列表")
-@IndexName(value = "program")
+@IndexName(value = "program",keepGlobalPrefix = true)
 public class ProgramSearchVo implements Serializable {
 
     @Serial
