@@ -49,7 +49,6 @@ public class ChatTypeHistoryAdvisor implements BaseChatMemoryAdvisor {
     
     @Override
     public ChatClientRequest before(final ChatClientRequest chatClientRequest, final AdvisorChain advisorChain) {
-        log.info("存储会话记录到数据库中");
         String conversationId = getConversationId(chatClientRequest.context(), this.defaultConversationId);
         chatTypeHistoryService.save(type,conversationId);
         return chatClientRequest;
