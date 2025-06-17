@@ -1,6 +1,9 @@
 package org.javaup.ai.config;
 
+import org.javaup.ai.advisor.ChatTypeTitleAdvisor;
 import org.javaup.ai.ai.rag.MarkdownLoader;
+import org.javaup.ai.enums.ChatType;
+import org.javaup.ai.service.ChatTypeHistoryService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
@@ -10,12 +13,14 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 import java.util.List;
 
+import static org.javaup.ai.constants.DaMaiConstant.CHAT_TITLE_ADVISOR_ORDER;
 import static org.javaup.ai.constants.DaMaiConstant.MARK_DOWN_SYSTEM_PROMPT;
 import static org.javaup.ai.constants.DaMaiConstant.MESSAGE_CHAT_MEMORY_ADVISOR_ORDER;
 
@@ -34,7 +39,8 @@ public class DaMaiRagAiAutoConfiguration {
 
     @Bean
     public ChatClient markdownChatClient(OpenAiChatModel model, ChatMemory chatMemory, VectorStore vectorStore,
-                                         MarkdownLoader markdownLoader) {
+                                         MarkdownLoader markdownLoader, ChatTypeHistoryService chatTypeHistoryService, 
+                                         @Qualifier("titleChatClient")ChatClient titleChatClient) {
         List<Document> documentList = markdownLoader.loadMarkdowns();
         vectorStore.add(documentList);
         
@@ -43,6 +49,8 @@ public class DaMaiRagAiAutoConfiguration {
                 .defaultSystem(MARK_DOWN_SYSTEM_PROMPT)
                 .defaultAdvisors(
                         new SimpleLoggerAdvisor(),
+                        ChatTypeTitleAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode())
+                                .chatClient(titleChatClient).chatMemory(chatMemory).order(CHAT_TITLE_ADVISOR_ORDER).build(),
                         MessageChatMemoryAdvisor.builder(chatMemory).order(MESSAGE_CHAT_MEMORY_ADVISOR_ORDER).build(),
                         QuestionAnswerAdvisor.builder(vectorStore)
                                 .searchRequest(SearchRequest.builder()

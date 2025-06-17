@@ -1,7 +1,6 @@
 package org.javaup.ai.cotroller;
 
 import org.javaup.ai.advisor.ChatTypeHistoryAdvisor;
-import org.javaup.ai.advisor.ChatTypeTitleAdvisor;
 import org.javaup.ai.ai.function.call.ProgramCall;
 import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
 import org.javaup.ai.ai.rag.QueryRewriter;
@@ -25,7 +24,6 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
-import static org.javaup.ai.constants.DaMaiConstant.CHAT_TITLE_ADVISOR_ORDER;
 import static org.javaup.ai.constants.DaMaiConstant.CHAT_TYPE_HISTORY_ADVISOR_ORDER;
 
 /**
@@ -71,7 +69,6 @@ public class ProgramController {
                 .user(prompt)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
-                .advisors(ChatTypeTitleAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode()).chatClient(titleChatClient).chatMemory(chatMemory).order(CHAT_TITLE_ADVISOR_ORDER).build())
                 .stream()
                 .content();
     }
@@ -84,7 +81,7 @@ public class ProgramController {
                 .user(prompt)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
                 .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
-                .advisors(ChatTypeTitleAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).chatClient(titleChatClient).chatMemory(chatMemory).order(CHAT_TITLE_ADVISOR_ORDER).build())
+                .advisors()
                 .stream()
                 .content();
     }
