@@ -26,11 +26,6 @@ public class ChatTypeHistoryController {
     private final ChatTypeHistoryService chatHistoryService;
 
     private final ChatMemory chatMemory;
-
-    @RequestMapping("/chatId/list")
-    public List<String> getChatIdList(@RequestParam("type") Integer type) {
-        return chatHistoryService.getChatIdList(type);
-    }
     
     @RequestMapping("/type/history/list")
     public List<ChatTypeHistoryVo> getChatTypeHistoryList(@RequestParam("type") Integer type) {
