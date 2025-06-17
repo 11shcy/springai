@@ -88,7 +88,6 @@ public class ProgramController {
                 .user(prompt)
                 .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
                 .advisors(a -> {
-                    log.info("设置会话ID: {}", chatId);
                     a.param(ChatMemory.CONVERSATION_ID, chatId);
                 })
                 .advisors(ChatTypeTitleAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).chatClient(titleChatClient).chatMemory(chatMemory).order(CHAT_TITLE_ADVISOR_ORDER).build())
