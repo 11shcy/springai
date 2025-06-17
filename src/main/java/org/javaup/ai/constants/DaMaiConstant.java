@@ -69,9 +69,9 @@ public class DaMaiConstant {
     
     public static final String CREATE_ORDER_URL = "http://localhost:6085/damai/program/program/order/create/v1";
     
-    public static final Integer CHAT_TYPE_HISTORY_ADVISOR_ORDER = Ordered.HIGHEST_PRECEDENCE + 999;
+    public static final Integer CHAT_TYPE_HISTORY_ADVISOR_ORDER = Ordered.HIGHEST_PRECEDENCE + 998;
     
-    public static final Integer MESSAGE_CHAT_MEMORY_ADVISOR_ORDER = 2;
+    public static final Integer MESSAGE_CHAT_MEMORY_ADVISOR_ORDER = Ordered.HIGHEST_PRECEDENCE + 1000;
     
-    public static final Integer CHAT_TITLE_ADVISOR_ORDER = 1;
+    public static final Integer CHAT_TITLE_ADVISOR_ORDER = Ordered.HIGHEST_PRECEDENCE + 999;
 }
