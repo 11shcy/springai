@@ -1,6 +1,7 @@
 package org.javaup.ai.config;
 
 
+import org.javaup.ai.advisor.ChatTypeHistoryAdvisor;
 import org.javaup.ai.advisor.ChatTypeTitleAdvisor;
 import org.javaup.ai.ai.function.AiProgram;
 import org.javaup.ai.constants.DaMaiConstant;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 
 import static org.javaup.ai.constants.DaMaiConstant.CHAT_TITLE_ADVISOR_ORDER;
+import static org.javaup.ai.constants.DaMaiConstant.CHAT_TYPE_HISTORY_ADVISOR_ORDER;
 import static org.javaup.ai.constants.DaMaiConstant.MESSAGE_CHAT_MEMORY_ADVISOR_ORDER;
 
 /**
@@ -57,6 +59,7 @@ public class DaMaiAiAutoConfiguration {
                 .defaultSystem(DaMaiConstant.DA_MAI_SYSTEM_PROMPT)
                 .defaultAdvisors(
                         new SimpleLoggerAdvisor(),
+                        ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build(),
                         ChatTypeTitleAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode())
                                 .chatClient(titleChatClient).chatMemory(chatMemory).order(CHAT_TITLE_ADVISOR_ORDER).build(),
                         MessageChatMemoryAdvisor.builder(chatMemory).order(MESSAGE_CHAT_MEMORY_ADVISOR_ORDER).build()
