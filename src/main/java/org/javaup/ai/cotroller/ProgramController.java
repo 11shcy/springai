@@ -1,11 +1,10 @@
 package org.javaup.ai.cotroller;
 
-import org.javaup.ai.advisor.ChatTypeHistoryAdvisor;
+import jakarta.annotation.Resource;
 import org.javaup.ai.ai.function.call.ProgramCall;
 import org.javaup.ai.ai.function.dto.ProgramSearchFunctionDto;
 import org.javaup.ai.ai.rag.QueryRewriter;
 import org.javaup.ai.dto.ProgramDetailDto;
-import org.javaup.ai.enums.ChatType;
 import org.javaup.ai.service.ChatTypeHistoryService;
 import org.javaup.ai.vo.ProgramSearchVo;
 import org.javaup.ai.vo.result.ProgramDetailResultVo;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
-
-import static org.javaup.ai.constants.DaMaiConstant.CHAT_TYPE_HISTORY_ADVISOR_ORDER;
 
 /**
  * @program: 大麦-ai智能服务项目。 添加 阿星不是程序员 微信，添加时备注 ai 来获取项目的完整资料 
@@ -40,16 +36,13 @@ public class ProgramController {
     @Autowired
     private ProgramCall programCall;
 
-    @Qualifier("assistantChatClient")
-    @Autowired
+    @Resource
     private ChatClient assistantChatClient;
     
-    @Qualifier("markdownChatClient")
-    @Autowired
+    @Resource
     private ChatClient markdownChatClient;
     
-    @Qualifier("titleChatClient")
-    @Autowired
+    @Resource
     private ChatClient titleChatClient;
     
     @Autowired
@@ -68,7 +61,6 @@ public class ProgramController {
         return assistantChatClient.prompt()
                 .user(prompt)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
-                .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.ASSISTANT.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
                 .stream()
                 .content();
     }
@@ -80,8 +72,6 @@ public class ProgramController {
         return markdownChatClient.prompt()
                 .user(prompt)
                 .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, chatId))
-                .advisors(ChatTypeHistoryAdvisor.builder(chatTypeHistoryService).type(ChatType.MARKDOWN.getCode()).order(CHAT_TYPE_HISTORY_ADVISOR_ORDER).build())
-                .advisors()
                 .stream()
                 .content();
     }
